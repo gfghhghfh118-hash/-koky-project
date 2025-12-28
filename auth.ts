@@ -48,6 +48,9 @@ const providers: any[] = [
     }),
 ];
 
+console.log(">>> [AUTH] Google ID:", process.env.GOOGLE_CLIENT_ID ? "Found" : "Missing");
+console.log(">>> [AUTH] Google Secret:", process.env.GOOGLE_CLIENT_SECRET ? "Found" : "Missing");
+
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     providers.unshift(
         GoogleProvider({
