@@ -26,6 +26,25 @@ export default async function RootLayout({
     return (
         <html lang={locale} dir={dir} suppressHydrationWarning>
             <head>
+                <script
+                    dangerouslySetInnerHTML={{
+                        __html: `
+                            (function() {
+                                var suppressError = function(prop) {
+                                    try {
+                                        Object.defineProperty(window, prop, {
+                                            get: function() { return undefined; },
+                                            set: function(v) { /* Ignore setup by conflicting extensions */ },
+                                            configurable: true
+                                        });
+                                    } catch (e) {}
+                                };
+                                suppressError('ethereum');
+                                suppressError('tronLink');
+                            })();
+                        `,
+                    }}
+                />
             </head>
             <body className={clsx(outfit.className, "min-h-screen bg-background text-foreground transition-colors duration-300")}>
                 {/* <BrowserBlock /> */}
