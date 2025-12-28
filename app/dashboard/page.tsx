@@ -22,7 +22,7 @@ export default async function UserDashboard() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white mb-1">
-                        Welcome back, <span className="text-gradient">{user.username}</span>!
+                        Welcome back, <span className="text-gradient">{user.username || "User"}</span>!
                     </h1>
                     <p className="text-slate-500 text-sm font-medium">Here's what's happening with your account today.</p>
                 </div>
@@ -153,7 +153,7 @@ export default async function UserDashboard() {
                                 <UserIcon size={28} />
                             </div>
                             <div>
-                                <div className="text-lg font-black truncate max-w-[140px]">{user.username}</div>
+                                <div className="text-lg font-black truncate max-w-[140px]">{user.username || "User"}</div>
                                 <div className="text-[10px] text-slate-400 font-mono">ID: {user.id.split('-')[0]}</div>
                             </div>
                         </div>

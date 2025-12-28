@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import Link from "next/link";
 import { LogIn, Globe } from "lucide-react";
 import { useLanguage } from "@/components/providers/LanguageProvider";
+import { Social } from "@/components/auth/Social";
 
 export default function LoginPage() {
     const [errorMessage, dispatch, isPending] = useActionState(authenticate, undefined);
@@ -24,10 +25,6 @@ export default function LoginPage() {
                     </div>
                     <h1 className="text-xl font-bold text-gray-700">{t("auth.authorization")}</h1>
                 </div>
-
-                import {Social} from "@/components/auth/Social";
-
-                // ... (inside the component)
 
                 <form action={dispatch} className="space-y-4">
                     {/* Add Social Login at the top */}

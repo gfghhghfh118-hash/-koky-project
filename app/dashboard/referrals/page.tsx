@@ -25,7 +25,7 @@ export default async function ReferralPage() {
     const { headers } = await import("next/headers");
     const host = (await headers()).get("host") || "koky.bz";
     const protocol = host.includes("localhost") ? "http" : "https";
-    const referralLink = `${protocol}://${host}/register?ref=${user.username}`;
+    const referralLink = `${protocol}://${host}/register?ref=${user.username || user.id}`;
 
     const stats = {
         totalReferrals: user.referrals.length,
@@ -33,7 +33,7 @@ export default async function ReferralPage() {
         totalEarnings: user.referralEarnings,
         referralLink: referralLink,
         recentReferrals: user.referrals.map(r => ({
-            username: r.username,
+            username: r.username || "User",
             date: r.createdAt.toISOString().split('T')[0],
             income: 0 // We don't track income PER user yet in this simple schema, only total.
         }))

@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import Link from "next/link";
 import { UserPlus, Globe } from "lucide-react";
 import { useLanguage } from "@/components/providers/LanguageProvider";
+import { Social } from "@/components/auth/Social";
 
 export default function RegisterPage() {
     const [errorMessage, dispatch, isPending] = useActionState(register, undefined);
@@ -24,10 +25,6 @@ export default function RegisterPage() {
                     </div>
                     <h1 className="text-xl font-bold text-gray-700">{t("auth.registration")}</h1>
                 </div>
-
-                import {Social} from "@/components/auth/Social";
-
-                // ... (in component)
 
                 <form action={dispatch} className="space-y-4">
                     <div className="mb-4">

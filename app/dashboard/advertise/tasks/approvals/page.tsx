@@ -28,7 +28,7 @@ export default async function TaskApprovalsPage() {
 
     const formattedLogs = pendingLogs.map(log => ({
         id: log.id,
-        workerName: log.user.username,
+        workerName: log.user.username || "Unknown User",
         taskTitle: log.task.title,
         reward: log.task.userPayout,
         proof: log.proof || "",
