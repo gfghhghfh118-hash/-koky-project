@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String          @id @default(uuid())
+  username         String          @unique
+  password         String
+  email            String?         @unique
+  balance          Float           @default(0.0)
+  adBalance        Float           @default(0.0)
+  role             String          @default("USER")
+  createdAt        DateTime        @default(now())
+  referredById     String?
+  referralEarnings Float           @default(0.0)
+  tickets          SupportTicket[]
+  createdTasks     Task[]          @relation("CreatedTasks")
+  tasksDone        TaskLog[]
+  transactions     Transaction[]
+  referredBy       User?           @relation("UserReferrals", fields: [referredById], references: [id])
+  referrals        User[]          @relation("UserReferrals")
+}
+
+model Task {
+  id               String    @id @default(uuid())
+  title            String
+  description      String?
+  type             String
+  realPrice        Float
+  userPayout       Float
+  duration         Int
+  active           Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  approvalType     String    @default("MANUAL")
+  validationAnswer String?
+  adminStatus      String    @default("APPROVED")
+  creatorId        String?
+  url              String?
+  creator          User?     @relation("CreatedTasks", fields: [creatorId], references: [id])
+  logs             TaskLog[]
+}
+
+model TaskLog {
+  id           String   @id @default(uuid())
+  userId       String
+  taskId       String
+  timestamp    DateTime @default(now())
+  status       String   @default("PENDING")
+  proof        String?
+  earnedAmount Float
+  task         Task     @relation(fields: [taskId], references: [id])
+  user         User     @relation(fields: [userId], references: [id])
+}
+
+model Transaction {
+  id        String   @id @default(uuid())
+  userId    String
+  amount    Float
+  type      String
+  method    String?
+  status    String   @default("PENDING")
+  timestamp DateTime @default(now())
+  wallet    String?
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model AdminProfitLog {
+  id          String   @id @default(uuid())
+  source      String
+  amount      Float
+  description String?
+  timestamp   DateTime @default(now())
+}
+
+model SupportTicket {
+  id         String    @id @default(uuid())
+  userId     String?
+  subject    String
+  message    String
+  adminReply String?
+  email      String
+  whatsapp   String?
+  status     String    @default("OPEN")
+  createdAt  DateTime  @default(now())
+  repliedAt  DateTime?
+  user       User?     @relation(fields: [userId], references: [id])
+}
