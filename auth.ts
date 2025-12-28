@@ -5,7 +5,12 @@ import { db } from "./lib/db";
 import { z } from "zod";
 import GoogleProvider from "next-auth/providers/google";
 
-const providers: any[] = [
+const providers = [
+    GoogleProvider({
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        allowDangerousEmailAccountLinking: true,
+    }),
     Credentials({
         credentials: {
             username: { label: "Username", type: "text" },
@@ -47,19 +52,6 @@ const providers: any[] = [
         },
     }),
 ];
-
-console.log(">>> [AUTH] Google ID:", process.env.GOOGLE_CLIENT_ID ? "Found" : "Missing");
-console.log(">>> [AUTH] Google Secret:", process.env.GOOGLE_CLIENT_SECRET ? "Found" : "Missing");
-
-if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    providers.unshift(
-        GoogleProvider({
-            clientId: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-            allowDangerousEmailAccountLinking: true,
-        })
-    );
-}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     providers,
