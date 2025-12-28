@@ -58,5 +58,12 @@ export async function register(prevState: string | undefined, formData: FormData
         },
     });
 
-    redirect("/login");
+    // Send verification token
+    const { generateVerificationToken } = await import("@/lib/tokens");
+    const { sendVerificationEmail } = await import("@/lib/mail");
+
+    const verificationToken = await generateVerificationToken(email);
+    await sendVerificationEmail(verificationToken.identifier, verificationToken.token);
+
+    return "Confirm email sent!";
 }

@@ -4,8 +4,15 @@ import bcrypt from "bcryptjs";
 import { db } from "./lib/db";
 import { z } from "zod";
 
+import GoogleProvider from "next-auth/providers/google";
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
     providers: [
+        GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            allowDangerousEmailAccountLinking: true,
+        }),
         Credentials({
             credentials: {
                 username: { label: "Username", type: "text" },
@@ -27,6 +34,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         return null;
                     }
 
+                    // Allow users without password (Google users) to fail credentials gracefully
+                    if (!user.password) return null;
+
                     console.log(">>> [AUTH] User found, comparing passwords...");
                     const passwordsMatch = await bcrypt.compare(password, user.password);
 
@@ -46,11 +56,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     ],
     pages: {
         signIn: "/login",
+        error: "/auth/error",
     },
     session: { strategy: "jwt" },
     callbacks: {
-        async jwt({ token, user }) {
-            if (user) {
+        async signIn({ user, account }) {
+            // Allow Google OAuth without email verification (Google emails are verified)
+            if (account?.provider === "google") return true;
+
+            // For Credentials, check if email is verified (if we enforce it later)
+            // const existingUser = await db.user.findUnique({ where: { id: user.id } });
+            // if (!existingUser?.emailVerified) return false;
+
+            return true;
+        },
+        async jwt({ token, user, account }) {
+            if (account && user) {
                 token.id = user.id;
                 token.role = user.role;
             }
