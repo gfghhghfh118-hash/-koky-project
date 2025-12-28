@@ -3,57 +3,63 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { db } from "./lib/db";
 import { z } from "zod";
-
 import GoogleProvider from "next-auth/providers/google";
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
-    providers: [
+const providers: any[] = [
+    Credentials({
+        credentials: {
+            username: { label: "Username", type: "text" },
+            password: { label: "Password", type: "password" },
+        },
+        authorize: async (credentials) => {
+            console.log(">>> [AUTH] Authorizing credentials:", credentials);
+            const parsedCredentials = z
+                .object({ username: z.string(), password: z.string() })
+                .safeParse(credentials);
+
+            if (parsedCredentials.success) {
+                const { username, password } = parsedCredentials.data;
+                console.log(">>> [AUTH] Parsed credentials for:", username);
+
+                const user = await db.user.findUnique({ where: { username } });
+                if (!user) {
+                    console.log(">>> [AUTH] User NOT found in DB:", username);
+                    return null;
+                }
+
+                // Allow users without password (Google users) to fail credentials gracefully
+                if (!user.password) return null;
+
+                console.log(">>> [AUTH] User found, comparing passwords...");
+                const passwordsMatch = await bcrypt.compare(password, user.password);
+
+                if (passwordsMatch) {
+                    console.log(">>> [AUTH] SUCCESS: Passwords match for:", username);
+                    return user;
+                }
+                console.log(">>> [AUTH] FAILURE: Password mismatch for:", username);
+            } else {
+                console.log(">>> [AUTH] FAILURE: Zod parsing failed:", parsedCredentials.error.format());
+            }
+
+            console.log(">>> [AUTH] Authorization returning null");
+            return null;
+        },
+    }),
+];
+
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    providers.unshift(
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
             allowDangerousEmailAccountLinking: true,
-        }),
-        Credentials({
-            credentials: {
-                username: { label: "Username", type: "text" },
-                password: { label: "Password", type: "password" },
-            },
-            authorize: async (credentials) => {
-                console.log(">>> [AUTH] Authorizing credentials:", credentials);
-                const parsedCredentials = z
-                    .object({ username: z.string(), password: z.string() })
-                    .safeParse(credentials);
+        })
+    );
+}
 
-                if (parsedCredentials.success) {
-                    const { username, password } = parsedCredentials.data;
-                    console.log(">>> [AUTH] Parsed credentials for:", username);
-
-                    const user = await db.user.findUnique({ where: { username } });
-                    if (!user) {
-                        console.log(">>> [AUTH] User NOT found in DB:", username);
-                        return null;
-                    }
-
-                    // Allow users without password (Google users) to fail credentials gracefully
-                    if (!user.password) return null;
-
-                    console.log(">>> [AUTH] User found, comparing passwords...");
-                    const passwordsMatch = await bcrypt.compare(password, user.password);
-
-                    if (passwordsMatch) {
-                        console.log(">>> [AUTH] SUCCESS: Passwords match for:", username);
-                        return user;
-                    }
-                    console.log(">>> [AUTH] FAILURE: Password mismatch for:", username);
-                } else {
-                    console.log(">>> [AUTH] FAILURE: Zod parsing failed:", parsedCredentials.error.format());
-                }
-
-                console.log(">>> [AUTH] Authorization returning null");
-                return null;
-            },
-        }),
-    ],
+export const { handlers, signIn, signOut, auth } = NextAuth({
+    providers,
     pages: {
         signIn: "/login",
         error: "/auth/error",
