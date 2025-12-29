@@ -1,43 +1,47 @@
-export const dynamic = 'force-dynamic';
+"use client";
+
+import { useSession } from "next-auth/react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { addTestBalance } from "@/actions/finance"; // We will create this action
 
 export default function TestEnvPage() {
+    const { data: session } = useSession();
+    const [status, setStatus] = useState("");
+    const router = useRouter();
+
+    const handleAddFunds = async () => {
+        setStatus("Processing...");
+        try {
+            const res = await addTestBalance();
+            if (res.success) {
+                setStatus("Success! Funds added.");
+                router.refresh();
+            } else {
+                setStatus("Error: " + res.error);
+            }
+        } catch (e) {
+            setStatus("Failed to connect.");
+        }
+    };
+
+    if (!session) return <div className="p-10">Please login first.</div>;
+
     return (
-        <div className="p-8 font-mono">
-            <h1 className="text-2xl font-bold mb-4">Environment Diagnostics</h1>
-
-            <div className="space-y-2 mb-8">
-                <div>
-                    <strong>GOOGLE_CLIENT_ID: </strong>
-                    <span className={process.env.GOOGLE_CLIENT_ID ? "text-green-600" : "text-red-600"}>
-                        {process.env.GOOGLE_CLIENT_ID ? "✅ Loaded" : "❌ Missing"}
-                    </span>
-                </div>
-                <div>
-                    <strong>GOOGLE_CLIENT_SECRET: </strong>
-                    <span className={process.env.GOOGLE_CLIENT_SECRET ? "text-green-600" : "text-red-600"}>
-                        {process.env.GOOGLE_CLIENT_SECRET ? "✅ Loaded" : "❌ Missing"}
-                    </span>
-                </div>
-                <div>
-                    <strong>AUTH_SECRET: </strong>
-                    <span className={process.env.AUTH_SECRET ? "text-green-600" : "text-red-600"}>
-                        {process.env.AUTH_SECRET ? "✅ Loaded" : "❌ Missing"}
-                    </span>
-                </div>
+        <div className="p-10 max-w-md mx-auto space-y-6">
+            <h1 className="text-2xl font-bold text-red-600">🚧 Test Environment</h1>
+            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded">
+                <p className="font-bold">Logged in as: {session.user?.email}</p>
             </div>
 
-            <div className="border p-4 rounded bg-gray-50">
-                <h2 className="font-bold mb-2">Manual Sign-In Test</h2>
-                <form action="/api/auth/signin/google" method="POST">
-                    <input type="hidden" name="callbackUrl" value="/dashboard" />
-                    <button
-                        type="submit"
-                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                    >
-                        Force Server-Side Login (POST)
-                    </button>
-                </form>
-            </div>
+            <button
+                onClick={handleAddFunds}
+                className="w-full py-4 bg-emerald-600 text-white font-bold rounded shadow-lg hover:bg-emerald-700 transition"
+            >
+                Add $50.00 Test Balance 💰
+            </button>
+
+            {status && <p className="font-bold text-center mt-4">{status}</p>}
         </div>
     );
 }

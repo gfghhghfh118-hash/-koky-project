@@ -127,3 +127,26 @@ export async function requestDeposit(formData: FormData) {
         return { error: "Failed to submit deposit request" };
     }
 }
+
+export async function addTestBalance() {
+    try {
+        const session = await auth();
+        if (!session?.user?.email) return { error: "Unauthorized" };
+
+        const user = await db.user.findUnique({ where: { email: session.user.email } });
+        if (!user) return { error: "User not found" };
+
+        await db.user.update({
+            where: { id: user.id },
+            data: {
+                balance: { increment: 50 },
+                adBalance: { increment: 50 },
+            }
+        });
+
+        revalidatePath("/dashboard");
+        return { success: "Added $50.00 to balances!" };
+    } catch (error) {
+        return { error: "Internal Server Error" };
+    }
+}
