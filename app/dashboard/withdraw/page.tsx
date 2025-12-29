@@ -68,12 +68,19 @@ export default function WithdrawPage() {
                                     </div>
                                 </label>
                             </div>
-                            <div className="grid grid-cols-1 mt-2">
+                            <div className="grid grid-cols-2 gap-2 mt-2">
                                 <label className="cursor-pointer">
                                     <input type="radio" name="method" value="FAUCETPAY_USDT" className="peer sr-only" />
                                     <div className="p-3 border rounded text-center hover:bg-gray-50 peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 transition-all flex items-center justify-center gap-2">
                                         <Wallet className="" size={20} />
-                                        <span className="text-xs font-bold">FaucetPay USDT (TRC20)</span>
+                                        <span className="text-xs font-bold">FaucetPay (TRC20)</span>
+                                    </div>
+                                </label>
+                                <label className="cursor-pointer">
+                                    <input type="radio" name="method" value="USDT_BEP20" className="peer sr-only" />
+                                    <div className="p-3 border rounded text-center hover:bg-gray-50 peer-checked:border-yellow-500 peer-checked:bg-yellow-50 peer-checked:text-yellow-700 transition-all flex items-center justify-center gap-2">
+                                        <Wallet className="" size={20} />
+                                        <span className="text-xs font-bold">USDT (BEP20)</span>
                                     </div>
                                 </label>
                             </div>
