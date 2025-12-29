@@ -31,6 +31,7 @@ export default function DepositPage() {
         { name: "Vodafone Cash", number: "01124399677", icon: Smartphone, color: "text-red-600", bg: "bg-red-50", border: "border-red-200", value: "VODAFONE_CASH" },
         { name: "Etisalat Cash", number: "01124399677", icon: Smartphone, color: "text-green-600", bg: "bg-green-50", border: "border-green-200", value: "ETISALAT" },
         { name: "InstaPay", number: "01124399677", icon: Landmark, color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200", value: "INSTAPAY" },
+        { name: "Binance Smart Chain (BEP20)", number: "0x14dbd970158f96bad00d3caf53162f7758c41d2a", icon: Wallet, color: "text-yellow-600", bg: "bg-yellow-50", border: "border-yellow-200", value: "BINANCE_SMART_CHAIN" },
     ];
 
     const copyToClipboard = (text: string, name: string) => {
@@ -109,6 +110,7 @@ export default function DepositPage() {
                                         <option value="VODAFONE_CASH">Vodafone Cash</option>
                                         <option value="ETISALAT">Etisalat Cash</option>
                                         <option value="INSTAPAY">InstaPay</option>
+                                        <option value="BINANCE_SMART_CHAIN">Binance Smart Chain (BEP20)</option>
                                     </select>
                                 </div>
                                 <div>
