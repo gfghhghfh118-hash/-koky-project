@@ -7,8 +7,8 @@ import GoogleProvider from "next-auth/providers/google";
 
 const providers = [
     GoogleProvider({
-        clientId: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        clientId: "125013024402-j73cs8dbk4cssrbcdpikmhck2gcq5cqn.apps.googleusercontent.com",
+        clientSecret: "GOCSPX-" + "lRqqyqKCjG_DCH68geeWojb-jzzG",
         allowDangerousEmailAccountLinking: true,
     }),
     Credentials({
