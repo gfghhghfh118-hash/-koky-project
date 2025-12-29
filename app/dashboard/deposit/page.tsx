@@ -28,9 +28,9 @@ export default function DepositPage() {
     const [message, setMessage] = useState<{ error?: string; success?: string } | null>(null);
 
     const wallets = [
-        { name: "Vodafone Cash", number: "010xxxxxxxx", icon: Smartphone, color: "text-red-600", bg: "bg-red-50", border: "border-red-200", value: "VODAFONE_CASH" },
-        { name: "Etisalat Cash", number: "011xxxxxxxx", icon: Smartphone, color: "text-green-600", bg: "bg-green-50", border: "border-green-200", value: "ETISALAT" },
-        { name: "InstaPay", number: "username@instapay", icon: Landmark, color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200", value: "INSTAPAY" },
+        { name: "Vodafone Cash", number: "01124399677", icon: Smartphone, color: "text-red-600", bg: "bg-red-50", border: "border-red-200", value: "VODAFONE_CASH" },
+        { name: "Etisalat Cash", number: "01124399677", icon: Smartphone, color: "text-green-600", bg: "bg-green-50", border: "border-green-200", value: "ETISALAT" },
+        { name: "InstaPay", number: "01124399677", icon: Landmark, color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200", value: "INSTAPAY" },
     ];
 
     const copyToClipboard = (text: string, name: string) => {
