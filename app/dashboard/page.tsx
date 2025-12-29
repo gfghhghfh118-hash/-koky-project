@@ -196,7 +196,7 @@ export default async function UserDashboard() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                            {user.tasksDone.map((log: any) => (
+                            {(user.tasksDone || []).map((log: any) => (
                                 <tr key={log.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-colors group">
                                     <td className="px-6 py-5">
                                         <div className="flex items-center gap-3 transition-transform group-hover:translate-x-1 duration-200">
