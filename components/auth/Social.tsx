@@ -9,7 +9,7 @@ export const Social = () => {
 
     const onClick = (provider: "google") => {
         signIn(provider, {
-            callbackUrl: callbackUrl || "/dashboard",
+            callbackUrl: "/dashboard",
         });
     }
 
