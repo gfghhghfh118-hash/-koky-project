@@ -22,6 +22,7 @@ export const ar = {
         advertiser: "المعلن",
         profile: "الملف الشخصي",
         logout: "تسجيل خروج",
+        admin_dashboard: "لوحة المدير",
         // Items
         surfing: "تصفح إعلانات",
         youtube: "يوتيوب",
@@ -127,6 +128,8 @@ export const ar = {
         errors: {
             required: "جميع الحقول مطلوبة",
             user_exists: "اسم المستخدم موجود بالفعل",
+            "username or email already exists": "اسم المستخدم أو البريد الإلكتروني مسجل بالفعل. حاول تسجيل الدخول.",
+            credentialerror: "خطأ في بيانات الدخول. تأكد من صحة الاسم وكلمة المرور.",
             invalid: "بيانات الدخول غير صحيحة"
         }
     },

@@ -20,6 +20,7 @@ const financeItems = [
 interface UserSidebarProps {
     balance: number;
     adBalance: number;
+    role?: string;
 }
 
 import { ThemeToggle } from "./ThemeToggle";
@@ -29,7 +30,7 @@ import { useLanguage } from "@/components/providers/LanguageProvider";
 
 import { logout } from "@/actions/logout";
 
-export function UserSidebar({ balance, adBalance }: UserSidebarProps) {
+export function UserSidebar({ balance, adBalance, role }: UserSidebarProps) {
     const pathname = usePathname();
     const { t, language, setLanguage } = useLanguage();
 
@@ -65,6 +66,15 @@ export function UserSidebar({ balance, adBalance }: UserSidebarProps) {
             <div className="flex-1 overflow-y-auto px-3 py-2 space-y-8 custom-scrollbar">
                 {/* Main Section */}
                 <div>
+                    {role === "ADMIN" && (
+                        <Link
+                            href="/admin"
+                            className={cn(linkBaseClass, pathname.startsWith("/admin") && activeLinkClass, "rounded-lg border-l-0 mx-2 mb-2 bg-red-500/10 text-red-600 hover:bg-red-500/20 hover:text-red-700 dark:bg-red-500/20 dark:text-red-400 dark:hover:bg-red-500/30")}
+                        >
+                            <LayoutDashboard size={18} className="text-red-500" />
+                            <span className="tracking-tight font-bold">{t("sidebar.admin_dashboard")}</span>
+                        </Link>
+                    )}
                     <Link
                         href="/dashboard"
                         className={cn(linkBaseClass, pathname === "/dashboard" && activeLinkClass, "rounded-lg border-l-0 mx-2")}

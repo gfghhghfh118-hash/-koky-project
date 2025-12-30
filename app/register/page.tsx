@@ -6,6 +6,9 @@ import Link from "next/link";
 import { UserPlus, Globe } from "lucide-react";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import { Social } from "@/components/auth/Social";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { setReferralCookie } from "@/actions/referrals";
 
 export default function RegisterPage() {
     const [errorMessage, dispatch, isPending] = useActionState(register, undefined);
@@ -14,6 +17,18 @@ export default function RegisterPage() {
     const toggleLanguage = () => {
         setLanguage(language === "en" ? "ar" : "en");
     };
+
+    // Referral Handling
+    const searchParams = useSearchParams();
+    const ref = searchParams.get("ref");
+    const [referrer, setReferrer] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (ref) {
+            setReferralCookie(ref);
+            setReferrer(ref);
+        }
+    }, [ref]);
 
     return (
         <div className="flex min-h-screen w-full items-center justify-center bg-muted p-4">
@@ -24,6 +39,11 @@ export default function RegisterPage() {
                         <UserPlus size={24} />
                     </div>
                     <h1 className="text-xl font-bold text-gray-700">{t("auth.registration")}</h1>
+                    {referrer && (
+                        <div className="mt-2 text-sm text-green-600 bg-green-50 px-3 py-1 rounded-full inline-block border border-green-200">
+                            Referred by: <strong>{referrer}</strong>
+                        </div>
+                    )}
                 </div>
 
                 <form action={dispatch} className="space-y-4">

@@ -15,8 +15,9 @@ export default function SetupAdminPage() {
         setStatus("Processing...");
         const res = await promoteToAdmin(secret);
         if (res.success) {
-            setStatus("Success! You are now an Admin. Redirecting...");
-            setTimeout(() => router.push("/admin"), 2000);
+            setStatus("Success! You are now an Admin.");
+            alert("Success! Please LOGOUT and LOGIN again to access the Admin Dashboard.");
+            router.push("/api/auth/signout");
         } else {
             setStatus("Error: " + res.error);
         }

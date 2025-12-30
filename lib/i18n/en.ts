@@ -22,6 +22,7 @@ export const en = {
         advertiser: "Advertiser",
         profile: "Profile",
         logout: "Logout",
+        admin_dashboard: "Admin Dashboard",
         // Items
         surfing: "Surfing",
         youtube: "YouTube",
@@ -127,6 +128,8 @@ export const en = {
         errors: {
             required: "All fields are required",
             user_exists: "User already exists",
+            "username or email already exists": "Username or Email already exists. Please login.",
+            credentialerror: "Invalid credentials. Please check your username and password.",
             invalid: "Invalid credentials"
         }
     },

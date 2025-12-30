@@ -7,10 +7,8 @@ import { revalidatePath } from "next/cache";
 export async function createTask(formData: FormData) {
     const session = await auth();
 
-    // TODO: Add strict role check: if (session?.user.role !== "ADMIN") return { error: "Unauthorized" };
-    // For now, assuming access control is handled at the page level or we trust the session for this prototype phase.
-    if (!session || !session.user) {
-        return { error: "Not authenticated" };
+    if (!session || !session.user || session.user.role !== "ADMIN") {
+        return { error: "Unauthorized" };
     }
 
     const title = formData.get("title") as string;
@@ -46,8 +44,8 @@ export async function createTask(formData: FormData) {
 
 export async function getAdminStats() {
     const session = await auth();
-    if (!session || !session.user) {
-        return { error: "Not authenticated" };
+    if (!session || !session.user || session.user.role !== "ADMIN") {
+        return { error: "Unauthorized" };
     }
 
     // Calculate total profit from AdminProfitLog

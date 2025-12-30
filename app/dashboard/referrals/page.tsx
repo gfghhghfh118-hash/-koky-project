@@ -7,23 +7,41 @@ import { redirect } from "next/navigation";
 
 export default async function ReferralPage() {
     const session = await auth();
-    if (!session?.user?.id) redirect("/login");
+    console.log(">>>>>>>> [Referral Page DEBUG] Session Object:", JSON.stringify(session, null, 2));
 
+    if (!session?.user?.id) {
+        console.error(">>>>>>>> [Referral Page ERROR] No session or user ID found. Redirecting to login.");
+        redirect("/login");
+    }
+
+    console.log(">>>>>>>> [Referral Page DEBUG] Searching for user with ID:", session.user.id);
     const user = await db.user.findUnique({
         where: { id: session.user.id },
         include: {
             referrals: {
                 orderBy: { createdAt: 'desc' },
-                take: 50 // Limit for now
+                take: 50
             }
         }
     });
 
-    if (!user) redirect("/login");
+    if (!user) {
+        console.error(">>>>>>>> [Referral Page ERROR] User not found in DB for ID:", session.user.id);
+        redirect("/login");
+    }
+    console.log(">>>>>>>> [Referral Page DEBUG] User found:", user.username);
 
-    // Generate dynamic referral link based on headers (or fallback)
-    const { headers } = await import("next/headers");
-    const host = (await headers()).get("host") || "koky.bz";
+    // Generate dynamic referral link with robust fallback
+    let host = "koky.bz";
+    try {
+        const { headers } = await import("next/headers");
+        const headerList = await headers();
+        const h = headerList.get("host");
+        if (h) host = h;
+    } catch (e) {
+        console.error("Failed to get headers for host:", e);
+    }
+
     const protocol = host.includes("localhost") ? "http" : "https";
     const referralLink = `${protocol}://${host}/register?ref=${user.username || user.id}`;
 

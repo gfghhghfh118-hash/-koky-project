@@ -4,6 +4,7 @@ import "./globals.css";
 import clsx from "clsx";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/components/providers/LanguageProvider";
+import { AuthProvider } from "@/components/providers/SessionProvider";
 import { cookies } from "next/headers";
 import { BrowserBlock } from "@/components/BrowserBlock";
 
@@ -48,16 +49,18 @@ export default async function RootLayout({
             </head>
             <body className={clsx(outfit.className, "min-h-screen bg-background text-foreground transition-colors duration-300")}>
                 {/* <BrowserBlock /> */}
-                <LanguageProvider>
-                    <ThemeProvider
-                        attribute="class"
-                        defaultTheme="light"
-                        enableSystem
-                        disableTransitionOnChange
-                    >
-                        {children}
-                    </ThemeProvider>
-                </LanguageProvider>
+                <AuthProvider>
+                    <LanguageProvider>
+                        <ThemeProvider
+                            attribute="class"
+                            defaultTheme="light"
+                            enableSystem
+                            disableTransitionOnChange
+                        >
+                            {children}
+                        </ThemeProvider>
+                    </LanguageProvider>
+                </AuthProvider>
             </body>
         </html>
     );
