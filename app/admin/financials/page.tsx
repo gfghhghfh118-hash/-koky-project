@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { approveFinancialRequest, rejectFinancialRequest, getPendingRequests } from "@/actions/admin-finance";
+import { approveTransaction, rejectTransaction, getPendingTransactions } from "@/actions/admin-finance";
 import { Wallet, CheckCircle, XCircle, Clock, Search, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -16,14 +16,14 @@ export default function AdminFinancialsPage() {
 
     const loadRequests = async () => {
         setLoading(true);
-        const data = await getPendingRequests();
+        const data = await getPendingTransactions();
         setRequests(data);
         setLoading(false);
     };
 
     const handleAction = async (id: string, action: "approve" | "reject") => {
         setProcessingId(id);
-        const res = action === "approve" ? await approveFinancialRequest(id) : await rejectFinancialRequest(id);
+        const res = action === "approve" ? await approveTransaction(id, "admin") : await rejectTransaction(id, "admin");
         if (res.success) {
             setRequests(requests.filter(r => r.id !== id));
         } else {

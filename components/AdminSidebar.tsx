@@ -7,12 +7,12 @@ import { cn } from "@/lib/utils";
 import { logout } from "@/actions/logout";
 
 const navItems = [
-    { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-    { name: "Financial Requests", href: "/admin/financials", icon: DollarSign },
-    { name: "Users", href: "/admin/users", icon: Users },
-    { name: "Support Tickets", href: "/admin/tickets", icon: MessageSquare },
-    { name: "Profit Monitor", href: "/admin/profit", icon: LayoutDashboard },
-    { name: "Settings", href: "/admin/settings", icon: Settings },
+    { name: "لوحة التحكم", href: "/admin", icon: LayoutDashboard },
+    { name: "الطلبات المالية", href: "/admin/financials", icon: DollarSign },
+    { name: "المستخدمين", href: "/admin/users", icon: Users },
+    { name: "تذاكر الدعم", href: "/admin/tickets", icon: MessageSquare },
+    { name: "مراقبة الأرباح", href: "/admin/accounting", icon: LayoutDashboard },
+    { name: "الإعدادات", href: "/admin/settings", icon: Settings },
 ];
 
 export function AdminSidebar() {
@@ -22,9 +22,9 @@ export function AdminSidebar() {
         <div className="h-screen w-64 glass border-r border-white/10 flex flex-col text-white">
             <div className="p-6 border-b border-white/10">
                 <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-orange-500">
-                    Admin Panel
+                    لوحة المدير
                 </h1>
-                <p className="text-xs text-gray-400 mt-1">Master Control</p>
+                <p className="text-xs text-gray-400 mt-1">التحكم الكامل</p>
             </div>
 
             <nav className="flex-1 p-4 space-y-2">
@@ -54,7 +54,7 @@ export function AdminSidebar() {
                     className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-gray-400 hover:bg-red-900/20 hover:text-red-400 transition-colors"
                 >
                     <LogOut size={20} />
-                    <span>Logout</span>
+                    <span>تسجيل خروج</span>
                 </button>
             </div>
         </div>

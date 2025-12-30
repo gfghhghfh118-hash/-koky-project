@@ -27,6 +27,7 @@ model User {
   transactions     Transaction[]
   referredBy       User?           @relation("UserReferrals", fields: [referredById], references: [id])
   referrals        User[]          @relation("UserReferrals")
+  commissionLogs   CommissionLog[]
 }
 
 model Task {
@@ -46,6 +47,7 @@ model Task {
   url              String?
   creator          User?     @relation("CreatedTasks", fields: [creatorId], references: [id])
   logs             TaskLog[]
+  moderationTags   String[]  @default([]) // "drugs", "terrorism", "sexual", etc.
 }
 
 model TaskLog {
@@ -61,15 +63,22 @@ model TaskLog {
 }
 
 model Transaction {
-  id        String   @id @default(uuid())
-  userId    String
-  amount    Float
-  type      String
-  method    String?
-  status    String   @default("PENDING")
-  timestamp DateTime @default(now())
-  wallet    String?
-  user      User     @relation(fields: [userId], references: [id])
+  id            String   @id @default(uuid())
+  userId        String
+  amount        Float
+  type          String   // "DEPOSIT", "WITHDRAWAL"
+  method        String?  // "USDT", "BTC"
+  status        String   @default("PENDING") // "PENDING", "COMPLETED", "REJECTED"
+  timestamp     DateTime @default(now())
+  wallet        String?  // Receiver wallet (for withdrawals)
+  senderWallet  String?  // Sender wallet (for deposits)
+  txId          String?  // Blockchain Transaction ID
+  fee           Float    @default(0.0) // 1% Platform Fee
+  netAmount     Float    @default(0.0) // Amount after fee
+  adminActionId String?  // ID of admin who approved/rejected
+  
+  user          User           @relation(fields: [userId], references: [id])
+  commissions   CommissionLog[]
 }
 
 model AdminProfitLog {
@@ -119,4 +128,16 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model CommissionLog {
+  id          String   @id @default(uuid())
+  recipientId String
+  amount      Float
+  role        String   // "REFERRER" or "ADVERTISER"
+  transactionId String
+  timestamp   DateTime @default(now())
+  
+  recipient   User     @relation(fields: [recipientId], references: [id])
+  transaction Transaction @relation(fields: [transactionId], references: [id])
 }
