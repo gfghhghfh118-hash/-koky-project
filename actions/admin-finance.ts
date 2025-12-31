@@ -103,12 +103,16 @@ export async function rejectTransaction(transactionId: string, adminId: string) 
 
         revalidatePath("/admin/transactions");
         return { success: true };
+    } catch (error) {
+        console.error("Error rejecting transaction:", error);
+        return { success: false, error: "Failed to reject transaction" };
     }
+}
 
 export async function getPendingTransactions() {
-        return await db.transaction.findMany({
-            where: { status: "PENDING" },
-            include: { user: true },
-            orderBy: { timestamp: "desc" }
-        });
-    }
+    return await db.transaction.findMany({
+        where: { status: "PENDING" },
+        include: { user: true },
+        orderBy: { timestamp: "desc" }
+    });
+}
