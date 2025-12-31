@@ -29,7 +29,7 @@ export default async function AdminTransactionsPage() {
                         {transactions.map((tx) => (
                             <tr key={tx.id} className="hover:bg-white/5 transition-colors">
                                 <td className="py-4 px-4">
-                                    <div className="font-medium text-white">{tx.user.name || tx.user.email}</div>
+                                    <div className="font-medium text-white">{tx.user.username || tx.user.email}</div>
                                     <div className="text-xs text-gray-500">{tx.user.email}</div>
                                 </td>
                                 <td className="py-4 px-4 font-mono text-green-400 font-bold">
