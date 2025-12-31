@@ -17,91 +17,94 @@ export async function approveTransaction(transactionId: string, adminId: string)
     });
 
     if (!tx || tx.status !== "PENDING") {
-        throw new Error("Transaction not found or not pending");
+        return { success: false, error: "Transaction not found or not pending" };
     }
 
-    // 1. Calculate Fees and Net Amount
-    const fee = tx.amount * 0.01; // 1% Platform Fee
-    const netAmount = tx.amount - fee;
+    try {
 
-    // 2. Calculate Commissions (10%)
-    const commissionAmount = tx.amount * 0.10;
+        // 1. Calculate Fees and Net Amount
+        const fee = tx.amount * 0.01; // 1% Platform Fee
+        const netAmount = tx.amount - fee;
 
-    await db.$transaction(async (prisma) => {
-        // A. Update Transaction Status
-        await prisma.transaction.update({
-            where: { id: transactionId },
-            data: {
-                status: "COMPLETED",
-                fee: fee,
-                netAmount: netAmount,
-                adminActionId: adminId
-            }
-        });
+        // 2. Calculate Commissions (10%)
+        const commissionAmount = tx.amount * 0.10;
 
-        // B. Credit User Balance (Net Amount)
-        await prisma.user.update({
-            where: { id: tx.userId },
-            data: {
-                balance: { increment: netAmount }
-            }
-        });
+        await db.$transaction(async (prisma) => {
+            // A. Update Transaction Status
+            await prisma.transaction.update({
+                where: { id: transactionId },
+                data: {
+                    status: "COMPLETED",
+                    fee: fee,
+                    netAmount: netAmount,
+                    adminActionId: adminId
+                }
+            });
 
-        // C. Process Referral Commission (10%)
-        if (tx.user.referredById) {
+            // B. Credit User Balance (Net Amount)
             await prisma.user.update({
-                where: { id: tx.user.referredById },
+                where: { id: tx.userId },
                 data: {
-                    referralEarnings: { increment: commissionAmount },
-                    balance: { increment: commissionAmount } // Paying directly to balance? Or just tracking? Assuming balance.
+                    balance: { increment: netAmount }
                 }
             });
 
-            await prisma.commissionLog.create({
-                data: {
-                    recipientId: tx.user.referredById,
-                    amount: commissionAmount,
-                    role: "REFERRER",
-                    transactionId: tx.id
-                }
-            });
-        }
+            // C. Process Referral Commission (10%)
+            if (tx.user.referredById) {
+                await prisma.user.update({
+                    where: { id: tx.user.referredById },
+                    data: {
+                        referralEarnings: { increment: commissionAmount },
+                        balance: { increment: commissionAmount } // Paying directly to balance? Or just tracking? Assuming balance.
+                    }
+                });
 
-        // D. Process Advertiser Commission (10%)
-        // Logic: Who is the "Advertiser"? for now, let's assume it's a specific role or just a placeholder logic.
-        // If the requirements meant "The person who referred this user gets 10% AND the site gets 10% for ads", 
-        // that's different.
-        // User said: "10% to Accountant (Referrer) and 10% to Advertiser".
-        // I will currently implement Referrer logic. 
-        // If "Advertiser" refers to a 2nd level or specific admin role, I need that ID.
-        // For now, I'll stick to the Referrer logic which is clear. 
-        // If "Advertiser" means a generic pool, we'd log it differently.
-    });
+                await prisma.commissionLog.create({
+                    data: {
+                        recipientId: tx.user.referredById,
+                        amount: commissionAmount,
+                        role: "REFERRER",
+                        transactionId: tx.id
+                    }
+                });
+            }
 
-    revalidatePath("/admin/transactions");
-    return { success: true };
-}
+            // D. Process Advertiser Commission (10%)
+            // Logic: Who is the "Advertiser"? for now, let's assume it's a specific role or just a placeholder logic.
+            // If the requirements meant "The person who referred this user gets 10% AND the site gets 10% for ads", 
+            // that's different.
+            // User said: "10% to Accountant (Referrer) and 10% to Advertiser".
+            // I will currently implement Referrer logic. 
+            // If "Advertiser" refers to a 2nd level or specific admin role, I need that ID.
+            // For now, I'll stick to the Referrer logic which is clear. 
+            // If "Advertiser" means a generic pool, we'd log it differently.
+        });
+
+        revalidatePath("/admin/transactions");
+        return { success: true };
+    }
 
 /**
  * Reject a pending transaction.
  */
 export async function rejectTransaction(transactionId: string, adminId: string) {
-    await db.transaction.update({
-        where: { id: transactionId },
-        data: {
-            status: "REJECTED",
-            adminActionId: adminId
-        }
-    });
+        try {
+            await db.transaction.update({
+                where: { id: transactionId },
+                data: {
+                    status: "REJECTED",
+                    adminActionId: adminId
+                }
+            });
 
-    revalidatePath("/admin/transactions");
-    return { success: true };
-}
+            revalidatePath("/admin/transactions");
+            return { success: true };
+        }
 
 export async function getPendingTransactions() {
-    return await db.transaction.findMany({
-        where: { status: "PENDING" },
-        include: { user: true },
-        orderBy: { timestamp: "desc" }
-    });
-}
+            return await db.transaction.findMany({
+                where: { status: "PENDING" },
+                include: { user: true },
+                orderBy: { timestamp: "desc" }
+            });
+        }
