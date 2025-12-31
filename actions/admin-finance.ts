@@ -82,29 +82,33 @@ export async function approveTransaction(transactionId: string, adminId: string)
 
         revalidatePath("/admin/transactions");
         return { success: true };
+    } catch (error) {
+        console.error("Error approving transaction:", error);
+        return { success: false, error: "Failed to approve transaction" };
     }
+}
 
 /**
  * Reject a pending transaction.
  */
 export async function rejectTransaction(transactionId: string, adminId: string) {
-        try {
-            await db.transaction.update({
-                where: { id: transactionId },
-                data: {
-                    status: "REJECTED",
-                    adminActionId: adminId
-                }
-            });
+    try {
+        await db.transaction.update({
+            where: { id: transactionId },
+            data: {
+                status: "REJECTED",
+                adminActionId: adminId
+            }
+        });
 
-            revalidatePath("/admin/transactions");
-            return { success: true };
-        }
+        revalidatePath("/admin/transactions");
+        return { success: true };
+    }
 
 export async function getPendingTransactions() {
-            return await db.transaction.findMany({
-                where: { status: "PENDING" },
-                include: { user: true },
-                orderBy: { timestamp: "desc" }
-            });
-        }
+        return await db.transaction.findMany({
+            where: { status: "PENDING" },
+            include: { user: true },
+            orderBy: { timestamp: "desc" }
+        });
+    }
