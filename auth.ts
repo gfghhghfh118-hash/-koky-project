@@ -65,29 +65,75 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             if (account?.provider === "google") return true;
             return true;
         },
-        async jwt({ token }) {
-            if (!token.sub) return token;
+        async jwt({ token, account, profile }) {
+            // On initial sign-in
+            if (account && profile) {
+                const email = profile.email;
+                if (!email) return token;
 
-            try {
-                const existingUser = await db.user.findUnique({
-                    where: { id: token.sub }
-                });
+                try {
+                    // 1. Try to find user by email
+                    let dbUser = await db.user.findUnique({
+                        where: { email }
+                    });
 
-                if (!existingUser) {
-                    console.log("[JWT] User not found in DB for token.sub:", token.sub);
-                    return token;
+                    // 2. If user doesn't exist, create them
+                    if (!dbUser) {
+                        console.log("[JWT] Google User not found, creating new user for:", email);
+
+                        // Generate unique username
+                        let baseUsername = (profile.name || email.split("@")[0])
+                            .replace(/[^a-zA-Z0-9]/g, "")
+                            .toLowerCase()
+                            .substring(0, 15);
+                        let username = baseUsername;
+                        let counter = 1;
+
+                        while (await db.user.findUnique({ where: { username } })) {
+                            username = `${baseUsername}${Math.floor(Math.random() * 1000)}`;
+                            counter++;
+                        }
+
+                        dbUser = await db.user.create({
+                            data: {
+                                email,
+                                username,
+                                image: (profile.picture as string) || null,
+                                role: "USER",
+                                balance: 0,
+                                adBalance: 0,
+                                emailVerified: new Date(),
+                                // Optionally link referral here if we had the cookie in the request
+                            }
+                        });
+                    }
+
+                    // 3. Update token with DB ID and Role
+                    token.sub = dbUser.id;
+                    token.role = dbUser.role;
+                    token.id = dbUser.id; // redundant but safe
+
+                    console.log("[JWT] Synced Google User. Token Sub set to:", dbUser.id);
+                } catch (error) {
+                    console.error("[JWT] Error syncing user:", error);
                 }
+            } else if (token.sub) {
+                // Subsequent requests, verify user exists/fetch role
+                try {
+                    const existingUser = await db.user.findUnique({
+                        where: { id: token.sub }
+                    });
 
-                // console.log(`[JWT Callback] User: ${existingUser.username}, Role: ${existingUser.role}`);
-                token.role = existingUser.role;
-                token.id = token.sub;
-            } catch (error) {
-                console.error("[JWT Callback] Error fetching user:", error);
+                    if (existingUser) {
+                        token.role = existingUser.role;
+                    }
+                } catch (error) {
+                    // console.error("[JWT] Error refetching user", error);
+                }
             }
             return token;
         },
         async session({ session, token }) {
-            // console.log("[Session Callback] Token ID:", token.sub, "Session User:", !!session.user);
             if (token.sub && session.user) {
                 session.user.id = token.sub;
             }
