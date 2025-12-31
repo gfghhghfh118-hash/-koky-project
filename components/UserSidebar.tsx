@@ -151,8 +151,8 @@ export function UserSidebar({ balance, adBalance, role }: UserSidebarProps) {
                 <div>
                     <div className="mb-2 px-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{t("sidebar.profile")}</div>
                     <nav className="space-y-1">
-                        <Link href="/dashboard/referrals" className={cn(linkBaseClass, pathname === "/dashboard/referrals" && activeLinkClass, "rounded-lg border-l-0 mx-2")}>
-                            <Users size={18} className={cn("transition-transform group-hover:scale-110", pathname === "/dashboard/referrals" ? "text-primary" : "text-slate-400")} />
+                        <Link href="/dashboard/invite" className={cn(linkBaseClass, pathname === "/dashboard/invite" && activeLinkClass, "rounded-lg border-l-0 mx-2")}>
+                            <Users size={18} className={cn("transition-transform group-hover:scale-110", pathname === "/dashboard/invite" ? "text-primary" : "text-slate-400")} />
                             <span className="tracking-tight">{t("referrals.title")}</span>
                         </Link>
                         <Link href="/dashboard/settings" className={cn(linkBaseClass, pathname === "/dashboard/settings" && activeLinkClass, "rounded-lg border-l-0 mx-2")}>

@@ -6,15 +6,24 @@ import { ReferralView } from "./ReferralView";
 import { redirect } from "next/navigation";
 
 export default async function ReferralPage() {
+    // Force dynamic rendering and no caching to prevent redirect loops
+    const { headers } = await import("next/headers");
+    // This forces the page to be dynamic
+    await headers();
+
     const session = await auth();
     console.log(">>>>>>>> [Referral Page DEBUG] Session Object:", JSON.stringify(session, null, 2));
 
     if (!session?.user?.id) {
-        console.error(">>>>>>>> [Referral Page ERROR] No session or user ID found. Redirecting to login.");
-        redirect("/login");
+        return (
+            <div className="p-10 border-2 border-red-500 m-10 rounded">
+                <h1 className="text-2xl font-bold text-red-600">DEBUG ERROR: Session Missing</h1>
+                <pre>{JSON.stringify(session, null, 2)}</pre>
+            </div>
+        );
     }
 
-    console.log(">>>>>>>> [Referral Page DEBUG] Searching for user with ID:", session.user.id);
+    // console.log(">>>>>>>> [Referral Page DEBUG] Searching for user with ID:", session.user.id);
     const user = await db.user.findUnique({
         where: { id: session.user.id },
         include: {
@@ -27,9 +36,14 @@ export default async function ReferralPage() {
 
     if (!user) {
         console.error(">>>>>>>> [Referral Page ERROR] User not found in DB for ID:", session.user.id);
-        redirect("/login");
+        return (
+            <div className="p-10 border-2 border-red-500 m-10 rounded">
+                <h1 className="text-2xl font-bold text-red-600">DEBUG ERROR: User Not Found in DB</h1>
+                <p>Looking for ID: {session.user.id}</p>
+            </div>
+        );
     }
-    console.log(">>>>>>>> [Referral Page DEBUG] User found:", user.username);
+    // console.log(">>>>>>>> [Referral Page DEBUG] User found:", user.username);
 
     // Generate dynamic referral link with robust fallback
     let host = "koky.bz";

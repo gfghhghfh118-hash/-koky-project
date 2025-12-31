@@ -22,8 +22,9 @@ export default async function UserLayout({
 
         if (role === "ADMIN") {
             // Force redirect to Admin Dashboard if user is Admin
-            const { redirect } = await import("next/navigation");
-            redirect("/admin");
+            // DISABLED: This prevents admins from testing user features
+            // const { redirect } = await import("next/navigation");
+            // redirect("/admin");
         }
     }
 
