@@ -67,6 +67,18 @@ export async function completeTask(taskId: string) {
 
             // D. Distribute Referral Commissions (8% Referrer, 5% Site)
             await distributeCommissions(tx, userId, task.userPayout);
+
+            // E. Update Task Progress & Check Completion
+            const newCompleted = task.completedQuantity + 1;
+            const isFinished = task.targetQuantity > 0 && newCompleted >= task.targetQuantity;
+
+            await tx.task.update({
+                where: { id: taskId },
+                data: {
+                    completedQuantity: { increment: 1 },
+                    active: isFinished ? false : undefined // Deactivate if finished
+                }
+            });
         });
 
         revalidatePath("/dashboard");

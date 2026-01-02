@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import Link from "next/link";
 import { Youtube, MousePointerClick, Briefcase, Plus, Signal, Megaphone, TrendingUp, ChevronRight, Activity } from "lucide-react";
 import AdBalanceExchange from "@/components/AdBalanceExchange";
+import DeleteCampaignButton from "@/components/DeleteCampaignButton";
 
 export default async function ManageCampaigns() {
     const session = await auth();
@@ -97,8 +98,8 @@ export default async function ManageCampaigns() {
                             <div key={task.id} className="p-6 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-all group flex flex-col md:flex-row md:items-center justify-between gap-4">
                                 <div className="flex items-center gap-4">
                                     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm border ${task.type === "YOUTUBE" ? "bg-red-50 border-red-100 text-red-500" :
-                                            task.type === "SURFING" ? "bg-blue-50 border-blue-100 text-blue-500" :
-                                                "bg-emerald-50 border-emerald-100 text-emerald-500"
+                                        task.type === "SURFING" ? "bg-blue-50 border-blue-100 text-blue-500" :
+                                            "bg-emerald-50 border-emerald-100 text-emerald-500"
                                         }`}>
                                         {task.type === "YOUTUBE" && <Youtube size={24} strokeWidth={1.5} />}
                                         {task.type === "SURFING" && <MousePointerClick size={24} strokeWidth={1.5} />}
@@ -121,15 +122,21 @@ export default async function ManageCampaigns() {
                                     </div>
 
                                     <div className="flex items-center gap-3 pl-6 border-l border-slate-100 dark:border-slate-800">
+                                        <div className="text-right mr-2 hidden sm:block">
+                                            <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Progress</div>
+                                            <div className="text-xs font-black text-slate-900 dark:text-white family-mono">
+                                                {(task as any).completedQuantity || 0} <span className="text-slate-400">/</span> {(task as any).targetQuantity || "∞"}
+                                            </div>
+                                        </div>
+
                                         <div className={`text-[10px] font-black px-3 py-1.5 rounded-xl uppercase tracking-widest border transition-all ${(task as any).adminStatus === "PENDING"
-                                                ? "bg-amber-50 border-amber-100 text-amber-600"
-                                                : "bg-emerald-50 border-emerald-100 text-emerald-600"
+                                            ? "bg-amber-50 border-amber-100 text-amber-600"
+                                            : "bg-emerald-50 border-emerald-100 text-emerald-600"
                                             }`}>
                                             {(task as any).adminStatus || "ACTIVE"}
                                         </div>
-                                        <button className="p-2.5 rounded-xl bg-slate-50 text-slate-300 hover:text-slate-900 hover:bg-slate-100 transition-all border border-transparent hover:border-slate-200">
-                                            <ChevronRight size={18} />
-                                        </button>
+
+                                        <DeleteCampaignButton taskId={task.id} title={task.title} />
                                     </div>
                                 </div>
                             </div>

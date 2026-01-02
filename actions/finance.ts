@@ -4,40 +4,47 @@ import { db } from "@/lib/db";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 
+const EXCHANGE_RATE = 50; // 1 USD = 50 EGP
+
 export async function requestWithdrawal(formData: FormData) {
     const session = await auth();
     if (!session?.user?.id) return { error: "Not authenticated" };
 
     const userId = session.user.id;
-    const amount = parseFloat(formData.get("amount") as string);
+    let amount = parseFloat(formData.get("amount") as string);
     const method = formData.get("method") as string;
     const wallet = formData.get("wallet") as string;
+    const isEGP = formData.get("isEGP") === "true"; // Check if user input was in EGP
 
-    if (!amount || amount < 0.2) return { error: "Minimum withdrawal is $0.20 (approx. 10 EGP)" };
+    // If EGP, convert amount to USD for validation and deduction
+    const amountInUSD = isEGP ? amount / EXCHANGE_RATE : amount;
+
+    // Minimum USD limit (e.g. 0.2 USD = 10 EGP)
+    if (!amountInUSD || amountInUSD < 0.2) return { error: `Minimum withdrawal is $0.20 (approx. ${0.2 * EXCHANGE_RATE} EGP)` };
     if (!wallet || wallet.length < 10) return { error: "Invalid wallet number" };
-    if (!["VODAFONE_CASH", "ETISALAT", "INSTAPAY"].includes(method)) return { error: "Invalid method" };
+    if (!["VODAFONE_CASH", "ETISALAT", "INSTAPAY", "FAUCETPAY_USDT", "USDT_BEP20"].includes(method)) return { error: "Invalid method" };
 
     try {
         const user = await db.user.findUnique({ where: { id: userId } });
-        if (!user || user.balance < amount) return { error: "Insufficient funds" };
+        if (!user || user.balance < amountInUSD) return { error: "Insufficient funds" };
 
         // Transactional consistency: Deduct balance AND create log
         await db.$transaction(async (tx) => {
 
-            // 1. Deduct Balance
+            // 1. Deduct Balance (Always in USD)
             await tx.user.update({
                 where: { id: userId },
-                data: { balance: { decrement: amount } }
+                data: { balance: { decrement: amountInUSD } }
             });
 
             // 2. Create Transaction Log
             await tx.transaction.create({
                 data: {
                     userId,
-                    amount,
+                    amount: amountInUSD, // Store normalized USD amount
                     type: "WITHDRAWAL",
                     method,
-                    wallet,
+                    wallet: `${wallet} ${isEGP ? `(Requested: ${amount} EGP)` : ""}`,
                     status: "PENDING"
                 }
             });
@@ -100,23 +107,35 @@ export async function requestDeposit(formData: FormData) {
     if (!session?.user?.id) return { error: "Not authenticated" };
 
     const userId = session.user.id;
-    const amount = parseFloat(formData.get("amount") as string);
+    let amount = parseFloat(formData.get("amount") as string);
     const method = formData.get("method") as string;
     const transactionId = formData.get("transactionId") as string;
+    const senderIdentifier = formData.get("senderIdentifier") as string;
+    const isEGP = formData.get("isEGP") === "true";
 
-    if (!amount || amount < 1) return { error: "Minimum deposit is $1.00 (approx. 50 EGP)" };
-    if (!transactionId || transactionId.length < 5) return { error: "Please provide a valid Transaction ID or Sender Number" };
-    if (!["VODAFONE_CASH", "ETISALAT", "INSTAPAY"].includes(method)) return { error: "Invalid method" };
+    // For Deposit, we trust the input for creating the PENDING request. Admin verifies actual amount received.
+    const amountInUSD = isEGP ? amount / EXCHANGE_RATE : amount;
+
+    // Auto-generate a temporary Transaction ID since user is not providing reference number
+    // This allows the admin to edit/add real TXID later if needed, or just use it as a system ID.
+    const internalTxId = `DEP-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+    if (!amountInUSD || amountInUSD < 1) return { error: `Minimum deposit is $1.00 (approx. ${1 * EXCHANGE_RATE} EGP)` };
+    // transactionId validation removed
+    if (!senderIdentifier || senderIdentifier.length < 3) return { error: "Please provide your Sender Number or Wallet Address" };
+    if (!["VODAFONE_CASH", "ETISALAT", "INSTAPAY", "BINANCE_SMART_CHAIN"].includes(method)) return { error: "Invalid method" };
 
     try {
         await db.transaction.create({
             data: {
                 userId,
-                amount,
+                amount: amountInUSD,
                 type: "DEPOSIT",
                 method,
                 status: "PENDING",
-                wallet: transactionId // Store TXID in the wallet field for now
+                wallet: "SYSTEM_WALLET",
+                senderWallet: senderIdentifier,
+                txId: internalTxId,            // Use generated ID
             }
         });
 

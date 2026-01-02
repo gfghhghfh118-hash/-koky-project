@@ -28,6 +28,7 @@ model User {
   referredBy       User?           @relation("UserReferrals", fields: [referredById], references: [id])
   referrals        User[]          @relation("UserReferrals")
   commissionLogs   CommissionLog[]
+  banners          Banner[]
 }
 
 model Task {
@@ -48,6 +49,8 @@ model Task {
   creator          User?     @relation("CreatedTasks", fields: [creatorId], references: [id])
   logs             TaskLog[]
   moderationTags   String[]  @default([]) // "drugs", "terrorism", "sexual", etc.
+  targetQuantity   Int       @default(0)  // Total views/executions purchased
+  completedQuantity Int      @default(0)  // Number of times task was completed
 }
 
 model TaskLog {
@@ -140,4 +143,29 @@ model CommissionLog {
   
   recipient   User     @relation(fields: [recipientId], references: [id])
   transaction Transaction @relation(fields: [transactionId], references: [id])
+}
+
+model Banner {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  imageUrl  String
+  targetUrl String
+  type      String   @default("TOP_HEADER") // TOP_HEADER, SIDEBAR, FOOTER
+  
+  // Cost & Limits
+  cost      Float
+  days      Int      @default(0) // 0 means unlimited
+  views     Int      @default(0)
+  targetViews Int    @default(0)
+  clicks    Int      @default(0)
+  targetClicks Int   @default(0) // 0 means unlimited
+  
+  size      String   @default("468x60") // 468x60, 200x300, 728x90
+  
+  active    Boolean  @default(true)
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }

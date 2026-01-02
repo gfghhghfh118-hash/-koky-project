@@ -56,10 +56,19 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     );
 }
 
+const defaultContext: LanguageContextType = {
+    language: "en",
+    setLanguage: () => { },
+    t: (key: string) => key,
+    dir: "ltr"
+};
+
 export function useLanguage() {
     const context = useContext(LanguageContext);
     if (context === undefined) {
-        throw new Error("useLanguage must be used within a LanguageProvider");
+        // Prevent crash during hydration/initial render issues
+        // console.warn("useLanguage used outside of provider. Returning default.");
+        return defaultContext;
     }
     return context;
 }

@@ -6,9 +6,8 @@ import { revalidatePath } from "next/cache";
 
 export async function createTicket(formData: FormData) {
     console.log("--- START CREATE TICKET ACTION ---");
-    // const session = await auth();
-    // const userId = session?.user?.id;
-    const userId = null;
+    const session = await auth();
+    const userId = session?.user?.id || null;
 
     const subject = formData.get("subject") as string;
     const message = formData.get("message") as string;
@@ -46,25 +45,26 @@ export async function createTicket(formData: FormData) {
 }
 
 export async function replyTicket(ticketId: string, replyMessage: string) {
-    console.log("--- START REPLY TICKET ACTION (RAW SQL) ---");
+    console.log("--- START REPLY TICKET ACTION (PRISMA) ---");
     console.log("Input:", { ticketId, replyMessage });
 
     try {
-        // Use raw SQL to bypass Prisma Client sync issues
-        await db.$executeRawUnsafe(
-            `UPDATE SupportTicket SET adminReply = ?, status = 'CLOSED', repliedAt = ? WHERE id = ?`,
-            replyMessage,
-            new Date().toISOString(),
-            ticketId
-        );
+        await db.supportTicket.update({
+            where: { id: ticketId },
+            data: {
+                adminReply: replyMessage,
+                status: "CLOSED",
+                repliedAt: new Date()
+            }
+        });
 
-        console.log("Reply Success: Raw SQL update executed for ID =", ticketId);
+        console.log("Reply Success: Prisma update executed for ID =", ticketId);
 
         revalidatePath("/admin/tickets");
         revalidatePath("/dashboard/support");
         return { success: "Reply sent successfully!" };
     } catch (error: any) {
-        console.error("Reply Action Raw SQL Error:", error);
+        console.error("Reply Action Prisma Error:", error);
         return { error: `Failed to send reply: ${error.message || "Database error"}` };
     }
 }
@@ -80,12 +80,25 @@ export async function getUserTickets() {
     }
 
     try {
+        // Construct a robust query
+        const conditions: any[] = [];
+
+        if (session.user.id) {
+            conditions.push({ userId: session.user.id });
+        }
+
+        if (session.user.email) {
+            conditions.push({
+                email: { equals: session.user.email, mode: 'insensitive' }
+            });
+        }
+
+        // If we have no identifiers, return empty
+        if (conditions.length === 0) return [];
+
         const query = {
             where: {
-                OR: [
-                    { userId: session.user.id },
-                    { email: session.user.email || "" }
-                ]
+                OR: conditions
             },
             orderBy: { createdAt: "desc" } as any
         };

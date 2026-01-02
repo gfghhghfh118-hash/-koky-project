@@ -21,7 +21,7 @@ export default async function SurfingPage({
     const taskId = params.taskId as string;
 
     if (!taskId) {
-        return <div className="p-10 text-center text-slate-500 font-black uppercase tracking-widest">{t('premium.val_failed')}</div>;
+        redirect("/dashboard/earn");
     }
 
     const task = await db.task.findUnique({

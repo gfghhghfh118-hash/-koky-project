@@ -124,9 +124,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         where: { id: token.sub }
                     });
 
-                    if (existingUser) {
-                        token.role = existingUser.role;
+                    if (!existingUser) {
+                        console.log("[JWT] User not found (deleted?), invalidating token");
+                        return null;
                     }
+
+                    token.role = existingUser.role;
                 } catch (error) {
                     // console.error("[JWT] Error refetching user", error);
                 }

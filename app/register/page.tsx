@@ -10,7 +10,9 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { setReferralCookie } from "@/actions/referrals";
 
-export default function RegisterPage() {
+import { Suspense } from "react";
+
+function RegisterForm() {
     const [errorMessage, dispatch, isPending] = useActionState(register, undefined);
     const { t, language, setLanguage } = useLanguage();
 
@@ -128,5 +130,13 @@ export default function RegisterPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function RegisterPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+            <RegisterForm />
+        </Suspense>
     );
 }

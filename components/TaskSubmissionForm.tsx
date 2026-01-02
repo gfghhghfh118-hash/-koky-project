@@ -81,11 +81,22 @@ export default function TaskSubmissionForm({ task }: { task: any }) {
                         </a>
                     )}
 
+
                     <div className="space-y-3">
                         <label className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
                             <Zap size={12} className="text-amber-500" />
                             {task.approvalType === "AUTO" ? t('advertise_tasks.secret_answer') : t('tasks_review.proof')}
                         </label>
+
+                        {task.approvalType === "AUTO" && (
+                            <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 p-3 rounded-xl mb-2 flex gap-3 items-start">
+                                <Info className="text-blue-500 shrink-0 mt-0.5" size={16} />
+                                <p className="text-xs text-blue-700 dark:text-blue-300 font-bold leading-relaxed">
+                                    {t('advertise_tasks.auto_instruction_worker')}
+                                </p>
+                            </div>
+                        )}
+
                         <textarea
                             value={proof}
                             onChange={(e) => setProof(e.target.value)}

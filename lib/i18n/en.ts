@@ -15,6 +15,18 @@ export const en = {
         approved: "Approved",
         rejected: "Rejected",
     },
+    admin_create_task: {
+        create_task: "Create Task",
+        creating: "Creating...",
+        task_title: "Task Title",
+        task_title_placeholder: "e.g. Watch Video 30s",
+        real_price: "Real Price (Hidden)",
+        user_payout: "User Payout (Visible)",
+        duration: "Duration (sec)",
+        type: "Type",
+        surfing: "Surfing / Website",
+        youtube: "YouTube"
+    },
     sidebar: {
         office: "My Office",
         earn_money: "Earn Money",
@@ -156,7 +168,10 @@ export const en = {
         submit: "Pay & Launch Task",
         submitting: "Creating Task...",
         success: "Task Campaign created successfully!",
-        error: "Failed to create campaign"
+        error: "Failed to create campaign",
+        auto_instruction_advertiser: "Important: You MUST place the 'Secret Code' yourself inside the target video or website (in description or pinned comment), so the user can find it and type it here to claim the reward.",
+        auto_instruction_worker: "Important: This Secret Code is hidden inside the target link! Look for it in (Video Description, Comments, or Article) then type it here to claim your reward instantly.",
+        got_it: "Got it, don't show again"
     },
     advertise_surfing: {
         title: "Create New Surfing Task",

@@ -13,17 +13,30 @@ export function AdminReplyForm({ ticketId, existingReply }: { ticketId: string, 
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!reply.trim()) return;
+        console.log("Submit clicked, reply:", reply); // Debug log
 
-        startTransition(async () => {
-            const res = await replyTicket(ticketId, reply);
-            if (res.success) {
-                toast.success(res.success);
-                router.refresh();
-            } else {
-                toast.error(res.error);
-            }
-        });
+        if (!reply.trim()) {
+            console.log("Empty reply, aborting.");
+            return;
+        }
+
+        try {
+            startTransition(async () => {
+                console.log("Starting server action...");
+                const res = await replyTicket(ticketId, reply);
+                console.log("Server action finished:", res);
+
+                if (res.success) {
+                    toast.success(res.success);
+                    router.refresh();
+                } else {
+                    toast.error(res.error);
+                }
+            });
+        } catch (err) {
+            console.error("Client Submit Error:", err);
+            toast.error("Submission failed client-side");
+        }
     };
 
     if (existingReply) {

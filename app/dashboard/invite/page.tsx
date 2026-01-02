@@ -15,12 +15,7 @@ export default async function ReferralPage() {
     console.log(">>>>>>>> [Referral Page DEBUG] Session Object:", JSON.stringify(session, null, 2));
 
     if (!session?.user?.id) {
-        return (
-            <div className="p-10 border-2 border-red-500 m-10 rounded">
-                <h1 className="text-2xl font-bold text-red-600">DEBUG ERROR: Session Missing</h1>
-                <pre>{JSON.stringify(session, null, 2)}</pre>
-            </div>
-        );
+        redirect("/api/auth/signin");
     }
 
     // console.log(">>>>>>>> [Referral Page DEBUG] Searching for user with ID:", session.user.id);
@@ -36,12 +31,8 @@ export default async function ReferralPage() {
 
     if (!user) {
         console.error(">>>>>>>> [Referral Page ERROR] User not found in DB for ID:", session.user.id);
-        return (
-            <div className="p-10 border-2 border-red-500 m-10 rounded">
-                <h1 className="text-2xl font-bold text-red-600">DEBUG ERROR: User Not Found in DB</h1>
-                <p>Looking for ID: {session.user.id}</p>
-            </div>
-        );
+        // Force signout to clear bad cookie
+        redirect("/api/auth/signout");
     }
     // console.log(">>>>>>>> [Referral Page DEBUG] User found:", user.username);
 

@@ -3,7 +3,7 @@
 import { requestDeposit } from "@/actions/finance";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
-import { Wallet, Smartphone, Landmark, Copy, CheckCircle, Send } from "lucide-react";
+import { Wallet, Smartphone, Landmark, Copy, CheckCircle, Send, Clock } from "lucide-react";
 
 function SubmitButton() {
     const { pending } = useFormStatus();
@@ -26,12 +26,14 @@ function SubmitButton() {
 export default function DepositPage() {
     const [copied, setCopied] = useState("");
     const [message, setMessage] = useState<{ error?: string; success?: string } | null>(null);
+    const [isEGP, setIsEGP] = useState(false);
+    const [amount, setAmount] = useState("");
 
     const wallets = [
-        { name: "Vodafone Cash", number: "01124399677", icon: Smartphone, color: "text-red-600", bg: "bg-red-50", border: "border-red-200", value: "VODAFONE_CASH" },
-        { name: "Etisalat Cash", number: "01124399677", icon: Smartphone, color: "text-green-600", bg: "bg-green-50", border: "border-green-200", value: "ETISALAT" },
-        { name: "InstaPay", number: "01124399677", icon: Landmark, color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200", value: "INSTAPAY" },
-        { name: "Binance Smart Chain (BEP20)", number: "0x14dbd970158f96bad00d3caf53162f7758c41d2a", icon: Wallet, color: "text-yellow-600", bg: "bg-yellow-50", border: "border-yellow-200", value: "BINANCE_SMART_CHAIN" },
+        { name: "Vodafone Cash", number: "01124399677", icon: Smartphone, color: "text-red-600", bg: "bg-red-50", border: "border-red-200", value: "VODAFONE_CASH", isLocal: true },
+        { name: "Etisalat Cash", number: "01124399677", icon: Smartphone, color: "text-green-600", bg: "bg-green-50", border: "border-green-200", value: "ETISALAT", isLocal: true },
+        { name: "InstaPay", number: "01124399677", icon: Landmark, color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200", value: "INSTAPAY", isLocal: true },
+        { name: "Binance Smart Chain (BEP20)", number: "0x14dbd970158f96bad00d3caf53162f7758c41d2a", icon: Wallet, color: "text-yellow-600", bg: "bg-yellow-50", border: "border-yellow-200", value: "BINANCE_SMART_CHAIN", isLocal: false },
     ];
 
     const copyToClipboard = (text: string, name: string) => {
@@ -42,10 +44,23 @@ export default function DepositPage() {
 
     async function clientAction(formData: FormData) {
         setMessage(null);
+        // Inject isEGP into formData explicitly if not picked up
+        if (isEGP) formData.set("isEGP", "true");
+
         const res = await requestDeposit(formData);
         if (res?.error) setMessage({ error: res.error });
         if (res?.success) setMessage({ success: res.success });
     }
+
+    const handleMethodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const method = e.target.value;
+        const selected = wallets.find(w => w.value === method);
+        if (selected?.isLocal) {
+            setIsEGP(true);
+        } else {
+            setIsEGP(false);
+        }
+    };
 
     return (
         <div className="max-w-2xl mx-auto space-y-6">
@@ -54,6 +69,17 @@ export default function DepositPage() {
                     Add Funds (Deposit)
                 </div>
                 <div className="p-8">
+
+                    {/* Safety Alert */}
+                    <div className="mb-6 bg-blue-50 border border-blue-100 p-4 rounded-xl flex items-start gap-3">
+                        <div className="bg-blue-500 text-white p-1.5 rounded-lg shrink-0">
+                            <Clock size={16} />
+                        </div>
+                        <div className="text-xs">
+                            <p className="font-bold text-blue-900 mb-0.5">Withdrawal Processing</p>
+                            <p className="text-blue-700/80 font-medium italic">Safety first: All withdrawals are manually audited and processed within 24 hours.</p>
+                        </div>
+                    </div>
 
                     <div className="mb-8 p-5 bg-blue-50/50 text-blue-800 rounded-2xl border border-blue-100 flex gap-4 items-start">
                         <div className="bg-blue-500 text-white p-2 rounded-xl shrink-0">
@@ -66,7 +92,9 @@ export default function DepositPage() {
                                 <li>Copy the <strong>Transaction ID</strong> or <strong>Sender Number</strong>.</li>
                                 <li>Fill out the form below and submit it for review.</li>
                             </ol>
-                            <p className="mt-3 text-[11px] font-bold">Minimum Deposit: $1.00 (approx. 50 EGP)</p>
+                            <p className="mt-3 text-[11px] font-bold">
+                                Minimum Deposit: {isEGP ? "50 EGP (approx $1.00)" : "$1.00 USD"}
+                            </p>
                         </div>
                     </div>
 
@@ -100,13 +128,15 @@ export default function DepositPage() {
                         </h3>
 
                         <form action={clientAction} className="space-y-6">
+                            <input type="hidden" name="isEGP" value={isEGP ? "true" : "false"} />
                             {message?.error && <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm border border-red-100 font-bold">{message.error}</div>}
                             {message?.success && <div className="bg-emerald-50 text-emerald-600 p-4 rounded-xl text-sm border border-emerald-100 font-bold">{message.success}</div>}
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Payment Method</label>
-                                    <select name="method" className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all font-bold" required>
+                                    <select name="method" onChange={handleMethodChange} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all font-bold" required>
+                                        <option value="">Select Method</option>
                                         <option value="VODAFONE_CASH">Vodafone Cash</option>
                                         <option value="ETISALAT">Etisalat Cash</option>
                                         <option value="INSTAPAY">InstaPay</option>
@@ -114,29 +144,40 @@ export default function DepositPage() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Amount ($ USD)</label>
-                                    <input
-                                        type="number"
-                                        name="amount"
-                                        step="0.01"
-                                        min="1"
-                                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all font-bold"
-                                        placeholder="1.00"
-                                        required
-                                    />
+                                    <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">
+                                        Amount ({isEGP ? "EGP" : "$ USD"})
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            name="amount"
+                                            value={amount}
+                                            onChange={(e) => setAmount(e.target.value)}
+                                            step="0.01"
+                                            min={isEGP ? "50" : "1"}
+                                            className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all font-bold"
+                                            placeholder={isEGP ? "e.g. 500" : "1.00"}
+                                            required
+                                        />
+                                        {amount && isEGP && (
+                                            <div className="absolute right-3 top-3 text-xs text-gray-400 font-medium">
+                                                ≈ ${(parseFloat(amount) / 50).toFixed(2)} USD
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Transaction ID / Sender Number</label>
+                                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Sender Number / Wallet Address</label>
                                 <input
                                     type="text"
-                                    name="transactionId"
+                                    name="senderIdentifier"
                                     className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all font-bold"
-                                    placeholder="Enter TXID or your phone number"
+                                    placeholder="e.g. 010xxxx or Wallet Address"
                                     required
                                 />
-                                <p className="text-[10px] text-gray-400 mt-2 font-medium italic">Our manager will verify this information manually.</p>
+                                <p className="text-[10px] text-gray-400 mt-2 font-medium italic">The number or wallet address you sent the money FROM.</p>
                             </div>
 
                             <SubmitButton />

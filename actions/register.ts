@@ -38,8 +38,13 @@ export async function register(prevState: string | undefined, formData: FormData
     let referrerId = null;
 
     if (refUsername) {
-        const referrer = await db.user.findUnique({
-            where: { username: refUsername },
+        const referrer = await db.user.findFirst({
+            where: {
+                OR: [
+                    { username: refUsername },
+                    { id: refUsername }
+                ]
+            },
             select: { id: true }
         });
         if (referrer) {

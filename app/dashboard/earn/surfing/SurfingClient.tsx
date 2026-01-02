@@ -12,6 +12,7 @@ export function SurfingClient({ task }: { task: any }) {
     const [timeLeft, setTimeLeft] = useState(task.duration);
     const [status, setStatus] = useState<"RUNNING" | "COMPLETING" | "SUCCESS" | "ERROR">("RUNNING");
     const [earned, setEarned] = useState(0);
+    const [message, setMessage] = useState<{ error?: string } | null>(null);
 
     const progress = ((task.duration - timeLeft) / task.duration) * 100;
 
@@ -30,12 +31,14 @@ export function SurfingClient({ task }: { task: any }) {
         try {
             const result = await completeTask(task.id);
             if (result.error) {
+                setMessage({ error: result.error });
                 setStatus("ERROR");
             } else {
                 setEarned(result.earned || 0);
                 setStatus("SUCCESS");
             }
         } catch (e) {
+            setMessage({ error: "System Error" });
             setStatus("ERROR");
         }
     };
@@ -109,12 +112,18 @@ export function SurfingClient({ task }: { task: any }) {
                     )}
 
                     {status === "ERROR" && (
-                        <div className="flex items-center gap-3 text-red-400 font-black bg-red-500/10 px-6 py-2 rounded-2xl border border-red-500/20">
-                            {t('premium.val_failed')}
+                        <div className="flex flex-col items-center gap-2 text-red-400 font-black bg-red-500/10 px-6 py-4 rounded-2xl border border-red-500/20">
+                            <div className="uppercase tracking-widest text-[10px]">Error Details:</div>
+                            <div className="text-sm bg-black/20 p-2 rounded text-mono">
+                                {message?.error ? message.error : "Unknown Error (No Message)"}
+                            </div>
                         </div>
                     )}
                 </div>
             </div>
+
+            {/* DEBUG INDICATOR */}
+            <div className="fixed bottom-2 right-2 text-[8px] text-white/10 pointer-events-none">v1.1-debug</div>
 
             {/* Iframe Content Container */}
             <div className="flex-1 bg-white relative">

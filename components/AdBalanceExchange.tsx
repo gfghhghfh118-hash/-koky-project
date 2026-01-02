@@ -1,7 +1,7 @@
 "use client";
 
 import { exchangeToAdBalance } from "@/actions/finance";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useFormStatus } from "react-dom";
 import { ArrowRightLeft, AlertTriangle, X, ShieldAlert, Sparkles, ChevronRight, CheckCircle, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -26,7 +26,20 @@ export default function AdBalanceExchange({ userBalance }: { userBalance: number
     const [message, setMessage] = useState<{ error?: string; success?: string } | null>(null);
     const formRef = useRef<HTMLFormElement>(null);
 
-    async function handleConfirm() {
+    const [skipConfirm, setSkipConfirm] = useState(false);
+
+    useEffect(() => {
+        const saved = localStorage.getItem("skipAdExchangeConfirm");
+        if (saved) {
+            setSkipConfirm(true);
+        }
+    }, []);
+
+    async function executeTransfer() {
+        if (!skipConfirm) {
+            localStorage.setItem("skipAdExchangeConfirm", "true");
+            setSkipConfirm(true);
+        }
         setShowModal(false);
         const res = await exchangeToAdBalance(amount);
         if (res?.error) setMessage({ error: res.error });
@@ -35,6 +48,14 @@ export default function AdBalanceExchange({ userBalance }: { userBalance: number
             setAmount(0);
         }
     }
+
+    const handleTransferClick = () => {
+        if (skipConfirm) {
+            executeTransfer();
+        } else {
+            setShowModal(true);
+        }
+    };
 
     return (
         <div className="relative overflow-hidden rounded-3xl border border-white/20 dark:border-slate-800/30 bg-white/40 dark:bg-slate-900/10 p-6 backdrop-blur-md">
@@ -68,7 +89,7 @@ export default function AdBalanceExchange({ userBalance }: { userBalance: number
                             />
                         </div>
                     </div>
-                    <SubmitButton onClick={() => setShowModal(true)} disabled={amount <= 0 || amount > userBalance} />
+                    <SubmitButton onClick={handleTransferClick} disabled={amount <= 0 || amount > userBalance} />
                 </form>
             </div>
 
@@ -84,60 +105,29 @@ export default function AdBalanceExchange({ userBalance }: { userBalance: number
                 </div>
             )}
 
-            {/* CONFIRMATION MODAL - Premium Redesign */}
+            {/* CONFIRMATION MODAL - Simple Design */}
             {showModal && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-xl p-4 animate-in fade-in duration-300">
-                    <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-[0_32px_128px_-16px_rgba(0,0,0,0.5)] max-w-md w-full p-8 relative animate-in zoom-in-95 duration-300 border border-white/20 dark:border-slate-800/50">
-                        <button
-                            onClick={() => setShowModal(false)}
-                            className="absolute top-6 right-6 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all"
-                        >
-                            <X size={20} />
-                        </button>
-
-                        <div className="flex flex-col items-center text-center">
-                            <div className="w-20 h-20 rounded-[2rem] bg-amber-500/10 text-amber-500 flex items-center justify-center mb-6 shadow-inner ring-8 ring-amber-500/5 animate-pulse">
-                                <AlertTriangle size={40} strokeWidth={2.5} />
-                            </div>
-
-                            <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">Security Checkpoint</h3>
-                            <p className="text-slate-500 text-sm font-medium mb-8">
-                                You are transferring <span className="text-slate-900 dark:text-white font-black px-1.5 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 tabular-nums">${amount.toFixed(2)}</span> to your Advertising Assets.
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-white/10 relative animate-in zoom-in-95 duration-200">
+                        <div className="text-center" dir="rtl">
+                            <h3 className="font-bold text-lg mb-2 text-slate-800 dark:text-white">تأكيد التحويل</h3>
+                            <p className="text-sm text-slate-600 dark:text-slate-300 mb-6">
+                                هل أنت متأكد من تحويل <span className="font-bold">${amount.toFixed(2)}</span> إلى رصيد الإعلانات؟<br />
+                                <span className="text-xs text-red-500 mt-1 block font-bold">لا يمكن التراجع عن هذه العملية.</span>
                             </p>
 
-                            <div className="w-full space-y-3 mb-8">
-                                <div className="p-4 rounded-3xl bg-slate-50 dark:bg-slate-950/50 border border-slate-100 dark:border-slate-800/50 text-left">
-                                    <div className="flex items-start gap-3 text-slate-600 dark:text-slate-400 text-xs font-bold leading-relaxed mb-4">
-                                        <div className="p-1 rounded-full bg-slate-200 dark:bg-slate-800 mt-0.5"><Info size={10} /></div>
-                                        <span>Advertising funds are non-refundable and dedicated solely for campaign distribution.</span>
-                                    </div>
-
-                                    <div className="flex justify-between items-center px-1">
-                                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Network Fee (1%)</div>
-                                        <div className="text-xs font-black text-rose-500 tabular-nums">-${(amount * 0.01).toFixed(4)}</div>
-                                    </div>
-
-                                    <div className="h-px bg-slate-200 dark:bg-slate-800 my-3" />
-
-                                    <div className="flex justify-between items-center px-1">
-                                        <div className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest">Net Credit</div>
-                                        <div className="text-xl font-black text-primary tabular-nums">${(amount * 0.99).toFixed(4)}</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4 w-full">
+                            <div className="flex gap-3 justify-center">
                                 <button
                                     onClick={() => setShowModal(false)}
-                                    className="py-4 px-6 rounded-2xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 font-black text-xs uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-800 transition-all active:scale-95"
+                                    className="px-4 py-2 rounded-lg text-sm font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                                 >
-                                    Cancel
+                                    إلغاء
                                 </button>
                                 <button
-                                    onClick={handleConfirm}
-                                    className="btn-gradient py-4 px-6 rounded-2xl text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-500/25 active:scale-95 border border-white/20"
+                                    onClick={executeTransfer}
+                                    className="px-6 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
                                 >
-                                    Confirm Transfer
+                                    موافق، تنفيذ العملية
                                 </button>
                             </div>
                         </div>

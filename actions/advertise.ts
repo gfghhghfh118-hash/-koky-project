@@ -30,7 +30,7 @@ export async function createYouTubeCampaign(formData: FormData) {
 
     const totalCost = costPerView * views;
 
-    if (views < 100) return { error: "Minimum 100 views required" };
+    if (views < 10) return { error: "Minimum 10 views required" };
 
     try {
         const user = await db.user.findUnique({ where: { id: userId } });
@@ -64,7 +64,9 @@ export async function createYouTubeCampaign(formData: FormData) {
                     realPrice: costPerView,
                     userPayout: userPayout,
                     creatorId: userId, // Link to creator
-                    active: true
+                    active: true,
+                    targetQuantity: views,
+                    completedQuantity: 0
                 }
             });
         });
@@ -101,7 +103,7 @@ export async function createSurfingCampaign(formData: FormData) {
 
     const totalCost = costPerView * views;
 
-    if (views < 100) return { error: "Minimum 100 views required" };
+    if (views < 10) return { error: "Minimum 10 views required" };
 
     try {
         const user = await db.user.findUnique({ where: { id: userId } });
@@ -126,7 +128,9 @@ export async function createSurfingCampaign(formData: FormData) {
                     realPrice: costPerView,
                     userPayout: userPayout,
                     creatorId: userId, // Link to creator
-                    active: true
+                    active: true,
+                    targetQuantity: views,
+                    completedQuantity: 0
                 }
             });
         });
@@ -157,12 +161,12 @@ export async function createGeneralTaskCampaign(formData: FormData) {
     const validationAnswer = formData.get("validationAnswer") as string;
 
     // --- AUTO ADMIN CHECKS ---
-    // 1. Basic Profanity Filter (Demo)
-    const badWords = ["scam", "fraud", "illegal", "free money"];
-    const content = (title + " " + description).toLowerCase();
-    if (badWords.some(word => content.includes(word))) {
-        return { error: "Security Check Failed: Content contains prohibited words." };
-    }
+    // 1. Basic Profanity Filter (DISABLED for now)
+    // const badWords = ["scam", "fraud", "illegal", "free money"];
+    // const content = (title + " " + description).toLowerCase();
+    // if (badWords.some(word => content.includes(word))) {
+    //     return { error: "Security Check Failed: Content contains prohibited words." };
+    // }
 
     // 2. URL Validation
     if (url && !url.startsWith("http")) {
@@ -207,7 +211,9 @@ export async function createGeneralTaskCampaign(formData: FormData) {
                     // New Fields
                     approvalType,
                     validationAnswer: approvalType === "AUTO" ? validationAnswer : null,
-                    adminStatus: "APPROVED" // Auto-Admin Passed
+                    adminStatus: "APPROVED", // Auto-Admin Passed
+                    targetQuantity: executions,
+                    completedQuantity: 0
                 }
             });
         });
@@ -218,5 +224,84 @@ export async function createGeneralTaskCampaign(formData: FormData) {
     } catch (error) {
         console.error("Task Campaign Error:", error);
         return { error: "Failed to create campaign" };
+    }
+}
+
+export async function deleteCampaign(taskId: string) {
+    const session = await auth();
+    if (!session?.user?.id) return { error: "Not authenticated" };
+
+    const userId = session.user.id;
+
+    try {
+        const task = await db.task.findUnique({
+            where: { id: taskId, creatorId: userId },
+            include: { _count: { select: { logs: true } } }
+        });
+
+        if (!task) return { error: "Task not found" };
+
+        const hasActivity = task._count.logs > 0;
+
+        // Calculate Refund: (Target - Completed) * Real Price
+        // Ensure we don't refund more than initial if something went wrong, and not negative.
+        const remainingQuantity = Math.max(0, task.targetQuantity - task.completedQuantity);
+        const refundAmount = remainingQuantity * task.realPrice;
+
+        await db.$transaction(async (tx) => {
+            // 1. Handle Task Deletion Strategy
+            if (hasActivity) {
+                // SOFT DELETE: Keep record for history, but deactivate
+                await tx.task.update({
+                    where: { id: taskId },
+                    data: {
+                        active: false,
+                        adminStatus: "DELETED",
+                        // Reset remaining to 0 so it doesn't count as pending work
+                        targetQuantity: task.completedQuantity
+                    }
+                });
+            } else {
+                // HARD DELETE: No history, safe to remove completely
+                await tx.task.delete({
+                    where: { id: taskId }
+                });
+            }
+
+            // 2. Process Refund if applicable
+            if (refundAmount > 0) {
+                // Increment Ad Balance
+                await tx.user.update({
+                    where: { id: userId },
+                    data: { adBalance: { increment: refundAmount } }
+                });
+
+                // Log the Refund Transaction
+                await tx.transaction.create({
+                    data: {
+                        userId,
+                        type: "REFUND",
+                        // Store amount nicely formatted
+                        amount: parseFloat(refundAmount.toFixed(5)),
+                        status: "COMPLETED",
+                        method: "AD_BALANCE",
+                        wallet: "System Refund",
+                        txId: `REF-${taskId.slice(0, 8)}`,
+                        description: `Refund for campaign: ${task.title}`
+                    }
+                });
+            }
+        });
+
+        revalidatePath("/dashboard/advertise");
+        return {
+            success: hasActivity
+                ? "Campaign stopped and remaining funds refunded."
+                : "Campaign deleted and funds refunded."
+        };
+
+    } catch (error) {
+        console.error("Delete Error:", error);
+        return { error: "Failed to delete campaign. Please contact support." };
     }
 }

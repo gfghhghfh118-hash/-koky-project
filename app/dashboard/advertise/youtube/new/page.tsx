@@ -1,7 +1,7 @@
 "use client";
 
 import { createYouTubeCampaign } from "@/actions/advertise";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import { Youtube, Link as LinkIcon, AlertCircle, CheckCircle2, Clock, Eye, ShieldCheck, PlusSquare, Zap, Play, Sparkles, ChevronRight } from "lucide-react";
@@ -42,6 +42,14 @@ export default function NewYouTubeCampaign() {
     const [views, setViews] = useState(1000);
     const [message, setMessage] = useState<{ error?: string; success?: string } | null>(null);
     const [isRedirecting, setIsRedirecting] = useState(false);
+    const [hideGuidelines, setHideGuidelines] = useState(false);
+
+    useEffect(() => {
+        const saved = localStorage.getItem("hideTaskGuidelines");
+        if (saved) {
+            setHideGuidelines(true);
+        }
+    }, []);
 
     const isAr = language === "ar";
 
@@ -244,23 +252,51 @@ export default function NewYouTubeCampaign() {
                         </div>
                     </div>
 
-                    {/* Meta Tips */}
-                    <div className="p-6 rounded-[2rem] bg-red-500/5 border border-red-500/10 space-y-4">
-                        <div className="flex items-center gap-3 text-red-600">
-                            <ShieldCheck size={20} />
-                            <span className="text-xs font-black uppercase tracking-widest">Pro Guidelines</span>
+                    {/* Content Policy & Guidelines - Shows One Time Only */}
+                    {!hideGuidelines && (
+                        <div className="p-6 rounded-[2rem] bg-amber-500/5 border border-amber-500/10 space-y-4 animate-in fade-in slide-in-from-top-4">
+                            <div className="flex items-center gap-3 text-amber-600">
+                                <ShieldCheck size={20} />
+                                <span className="text-xs font-black uppercase tracking-widest">
+                                    {isAr ? "سياسة المحتوى والنشر" : "Content & Publishing Policy"}
+                                </span>
+                            </div>
+
+                            <div className="space-y-3">
+                                <p className="text-[11px] font-bold text-slate-600 dark:text-slate-400 leading-relaxed">
+                                    {isAr
+                                        ? "لضمان بيئة آمنة، يتم مراجعة جميع الحملات تلقائياً بواسطة الذكاء الاصطناعي."
+                                        : "To ensure a safe environment, all campaigns are automatically reviewed by AI."}
+                                </p>
+
+                                <ul className="space-y-2 bg-white dark:bg-slate-900/50 p-4 rounded-xl border border-amber-500/10">
+                                    <li className="text-[10px] font-bold text-rose-500 flex items-center gap-2">
+                                        <AlertCircle size={12} />
+                                        {isAr ? "ممنوع المحتوى الجنسي أو الإباحي نهائياً." : "Strictly NO sexual or adult content."}
+                                    </li>
+                                    <li className="text-[10px] font-bold text-rose-500 flex items-center gap-2">
+                                        <AlertCircle size={12} />
+                                        {isAr ? "ممنوع المحتوى المتعلق بالإرهاب أو العنف." : "NO terrorism or violent content."}
+                                    </li>
+                                    <li className="text-[10px] font-bold text-rose-500 flex items-center gap-2">
+                                        <AlertCircle size={12} />
+                                        {isAr ? "ممنوع أي محتوى يخالف القوانين الدولية." : "NO illegal content or scams."}
+                                    </li>
+                                </ul>
+
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        localStorage.setItem("hideTaskGuidelines", "true");
+                                        setHideGuidelines(true);
+                                    }}
+                                    className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-amber-500/20"
+                                >
+                                    {isAr ? "أوافق على الشروط - لا تظهر مرة أخرى" : "I Agree - Don't Show Again"}
+                                </button>
+                            </div>
                         </div>
-                        <ul className="space-y-2">
-                            <li className="text-[11px] font-medium text-red-700/80 flex items-start gap-2">
-                                <ChevronRight size={10} className="mt-1 shrink-0" />
-                                Use high-quality thumbnails to increase CTR by up to 40%.
-                            </li>
-                            <li className="text-[11px] font-medium text-red-700/80 flex items-start gap-2">
-                                <ChevronRight size={10} className="mt-1 shrink-0" />
-                                Longer watch times (60s+) boost YouTube algorithm ranking.
-                            </li>
-                        </ul>
-                    </div>
+                    )}
                 </div>
             </form>
         </div>

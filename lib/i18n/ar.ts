@@ -15,6 +15,18 @@ export const ar = {
         approved: "مقبول",
         rejected: "مرفوض",
     },
+    admin_create_task: {
+        create_task: "إنشاء مهمة",
+        creating: "جاري الإنشاء...",
+        task_title: "عنوان المهمة",
+        task_title_placeholder: "مثال: شاهد فيديو 30 ثانية",
+        real_price: "السعر الحقيقي (مخفي)",
+        user_payout: "ربح المستخدم (مرئي)",
+        duration: "المدة (ثانية)",
+        type: "النوع",
+        surfing: "تصفح / موقع",
+        youtube: "يوتيوب"
+    },
     sidebar: {
         office: "مكتبي (الرئيسية)",
         earn_money: "كسب المال",
@@ -138,14 +150,14 @@ export const ar = {
         task_title: "عنوان المهمة",
         task_title_placeholder: "مثال: التسجيل في هذا الموقع وتأكيد البريد الإلكتروني",
         description: "وصف المهمة / التعليمات",
-        description_placeholder: "الخطوة الأولى: اذهب إلى الرابط... الخطوة الثانية: سجل...",
-        target_link: "الرابط المستهدف",
+        description_placeholder: "مساعدة وصف...",
+        target_link: "رابط الهدف",
         verification_method: "طريقة التحقق",
         manual_review: "مراجعة يدوية",
         manual_review_desc: "يقدم العامل إثباتاً (نص/صورة). تقوم أنت بالموافقة عليه أو رفضه يدوياً.",
         auto_approval: "موافقة تلقائية",
         auto_approval_desc: "يدخل العامل كوداً سرياً. يتحقق النظام منه ويدفع فوراً.",
-        secret_answer: "الإجابة السرية / الكود",
+        secret_answer: "الإجابة السرية / الشفرة",
         secret_answer_placeholder: "مثال: WELCOME2024",
         secret_answer_note: "* سيتم دفع الرصيد فوراً للمستخدمين الذين يكتبون هذا الكود بالضبط.",
         reward: "المكافأة لكل مستخدم ($)",
@@ -156,7 +168,10 @@ export const ar = {
         submit: "دفع وإطلاق المهمة",
         submitting: "جاري إنشاء المهمة...",
         success: "تم إنشاء حملة المهمة بنجاح!",
-        error: "فشل إنشاء الحملة"
+        error: "فشل إنشاء الحملة",
+        auto_instruction_advertiser: "تنبيه هام: يجب أن تضع 'الكود السري' بنفسك داخل الفيديو أو الموقع المستهدف (في الوصف أو تعليق مثبت)، حتى يجده المستخدم ويكتبه هنا ليحصل على المكافأة.",
+        auto_instruction_worker: "تنبيه هام: هذا الكود السري مخفي داخل الرابط المستهدف! ابحث عنه في (وصف الفيديو أو التعليقات أو داخل المقال) ثم اكتبه هنا لتحصل على المكافأة فوراً.",
+        got_it: "فهمت، لا تظهر مرة أخرى"
     },
     advertise_surfing: {
         title: "إنشاء مهمة تصفح جديدة",

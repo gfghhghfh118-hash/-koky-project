@@ -273,9 +273,9 @@ export default function Home() {
                         &copy; 2024 Koky.bz Replica. Built for Excellence.
                     </p>
                     <div className="flex justify-center gap-6 text-slate-400">
-                        <Link href="#" className="hover:text-slate-600 transition-colors">Terms</Link>
-                        <Link href="#" className="hover:text-slate-600 transition-colors">Privacy</Link>
-                        <Link href="#" className="hover:text-slate-600 transition-colors">Rules</Link>
+                        <Link href="/privacy-policy" className="hover:text-slate-600 transition-colors">Terms</Link>
+                        <Link href="/privacy-policy" className="hover:text-slate-600 transition-colors">Privacy</Link>
+                        <Link href="/privacy-policy" className="hover:text-slate-600 transition-colors">Rules</Link>
                     </div>
                 </div>
             </footer>

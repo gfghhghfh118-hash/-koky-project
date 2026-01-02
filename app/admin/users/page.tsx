@@ -44,12 +44,7 @@ export default async function AdminUsersPage() {
                                 </td>
                                 <td className="py-4 px-4 text-center">
                                     <div className="flex justify-center gap-2">
-                                        <form action={async () => {
-                                            "use server";
-                                            await updateUserRole(user.id, "ADMIN"); // Simple toggle for now, ideally a modal
-                                        }}>
-                                            {/* TODO: Add proper visual toggle later */}
-                                        </form>
+                                        {/* Admin Toggle Removed as per request */}
 
                                         <form action={async () => {
                                             "use server";

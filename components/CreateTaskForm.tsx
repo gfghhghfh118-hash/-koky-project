@@ -26,8 +26,25 @@ export function CreateTaskForm() {
         if (res?.success) setMessage({ success: res.success });
     }
 
+    const [showInstruction, setShowInstruction] = useState(true);
+
     return (
         <form action={clientAction} className="space-y-4">
+            {/* Instructional Alert for Advertisers */}
+            {showInstruction && (
+                <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl mb-6 relative animate-in fade-in slide-in-from-top-2">
+                    <p className="text-amber-800 text-sm font-bold leading-relaxed pr-8">
+                        ⚠️ تنبيه هام: يجب أن تضع 'الكود السري' بنفسك داخل الفيديو أو الموقع المستهدف (في الوصف أو تعليق مثبت)، حتى يجده المستخدم ويكتبه هنا ليحصل على المكافأة.
+                    </p>
+                    <button
+                        type="button"
+                        onClick={() => setShowInstruction(false)}
+                        className="absolute top-2 right-2 text-amber-500 hover:text-amber-700 p-1"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                    </button>
+                </div>
+            )}
             {message?.error && <div className="bg-red-500/10 text-red-500 p-3 rounded-lg text-sm">{message.error}</div>}
             {message?.success && <div className="bg-green-500/10 text-green-500 p-3 rounded-lg text-sm">{message.success}</div>}
 

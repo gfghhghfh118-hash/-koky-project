@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
-import { Wallet, CheckCircle, ArrowRightLeft, Megaphone, TrendingUp, Clock, ShieldCheck, User as UserIcon } from "lucide-react";
+import { BannerSlot } from "@/components/BannerSlot";
+import { Wallet, CheckCircle, ArrowRightLeft, Megaphone, TrendingUp, Clock, ShieldCheck, User as UserIcon, LogOut } from "lucide-react";
 import Link from "next/link";
 
 export default async function UserDashboard() {
@@ -34,15 +35,9 @@ export default async function UserDashboard() {
                 </div>
             </div>
 
-            {/* Top Info Alert */}
-            <div className="glass bg-blue-50/50 dark:bg-blue-900/10 border-blue-200/50 dark:border-blue-500/20 p-4 rounded-2xl flex items-start gap-4 shadow-sm">
-                <div className="bg-blue-500 text-white p-2 rounded-xl">
-                    <Clock size={18} strokeWidth={2.5} />
-                </div>
-                <div className="text-sm">
-                    <p className="font-bold text-blue-900 dark:text-blue-300 mb-0.5">Withdrawal Processing</p>
-                    <p className="text-blue-700/80 dark:text-blue-400/80 font-medium italic">Safety first: All withdrawals are manually audited and processed within 24 hours.</p>
-                </div>
+            {/* Top Info Alert REPLACED with Banner */}
+            <div className="w-full">
+                <BannerSlot type="TOP_HEADER" />
             </div>
 
             {/* Referral Promotion Banner */}
@@ -228,9 +223,8 @@ export default async function UserDashboard() {
                     </table>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
 
-// Helper icons needed by new UI (Adding imports above)
-import { LogOut } from "lucide-react";
+

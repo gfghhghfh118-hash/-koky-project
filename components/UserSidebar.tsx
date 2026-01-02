@@ -21,16 +21,15 @@ interface UserSidebarProps {
     balance: number;
     adBalance: number;
     role?: string;
+    sidebarBanner?: React.ReactNode;
 }
 
 import { ThemeToggle } from "./ThemeToggle";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 
-
-
 import { logout } from "@/actions/logout";
 
-export function UserSidebar({ balance, adBalance, role }: UserSidebarProps) {
+export function UserSidebar({ balance, adBalance, role, sidebarBanner }: UserSidebarProps) {
     const pathname = usePathname();
     const { t, language, setLanguage } = useLanguage();
 
@@ -55,6 +54,7 @@ export function UserSidebar({ balance, adBalance, role }: UserSidebarProps) {
 
     return (
         <div className="h-screen w-64 bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 flex flex-col text-sm shadow-xl shadow-slate-200/50 dark:shadow-none transition-all duration-300">
+
             {/* Logo Area */}
             <div className="p-6 mb-2">
                 <h1 className="text-2xl font-black tracking-tighter flex items-center gap-2">
@@ -64,6 +64,11 @@ export function UserSidebar({ balance, adBalance, role }: UserSidebarProps) {
             </div>
 
             <div className="flex-1 overflow-y-auto px-3 py-2 space-y-8 custom-scrollbar">
+                {/* Sidebar Banner */}
+                <div className="px-2">
+                    {sidebarBanner}
+                </div>
+
                 {/* Main Section */}
                 <div>
                     {role === "ADMIN" && (
