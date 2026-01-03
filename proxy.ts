@@ -1,7 +1,8 @@
 import NextAuth from "next-auth";
 import { authConfig } from "@/auth.config";
 
-export default NextAuth(authConfig).auth((req) => {
+// Rename export default to export const proxy for Next.js 16 convention
+export const proxy = NextAuth(authConfig).auth((req) => {
     // ----------------------------------------------------------------------
     // GEO BLOCKING: Block access from Israel (IL)
     // ----------------------------------------------------------------------
