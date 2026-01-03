@@ -98,7 +98,7 @@ export async function getPendingTransactions() {
         const transactions = await db.transaction.findMany({
             where: { status: "PENDING" },
             include: { user: { select: { username: true, email: true } } },
-            orderBy: { createdAt: "desc" }
+            orderBy: { timestamp: "desc" }
         });
         return transactions;
     } catch (e) {
