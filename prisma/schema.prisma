@@ -29,6 +29,12 @@ model User {
   referrals        User[]          @relation("UserReferrals")
   commissionLogs   CommissionLog[]
   banners          Banner[]
+  
+  // NEW FIELDS FOR AUTH & PREFS
+  accountType        String    @default("WORKER") // "WORKER" | "ADVERTISER"
+  allowNotifications Boolean   @default(true)
+  resetToken         String?
+  resetTokenExpiry   DateTime?
 }
 
 model Task {

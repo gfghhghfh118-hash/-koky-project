@@ -18,9 +18,16 @@ export default NextAuth(authConfig).auth((req) => {
     const isDashboard = pathname.startsWith("/dashboard");
     const isAdminRoute = pathname.startsWith("/admin");
     const isAdminUser = req.auth?.user?.role === "ADMIN";
+    const userEmail = req.auth?.user?.email;
+    const MASTER_ADMIN_EMAIL = "gfghhghfh118@gmail.com";
 
     // ADMIN 2FA & LOCATION PROTECTION
     if (isAdminRoute && isAdminUser) {
+        // 0. MASTER EMAIL CHECK
+        if (userEmail !== MASTER_ADMIN_EMAIL) {
+            console.log(`[Admin Blocked] Unauthorized Email: ${userEmail}`);
+            return Response.redirect(new URL("/blocked", req.nextUrl.origin));
+        }
         // 1. LOCATION CHECK (Skip on Localhost)
         const host = req.headers.get("host") || "";
         const isLocalhost = host.includes("localhost") || host.includes("127.0.0.1");

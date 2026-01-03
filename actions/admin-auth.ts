@@ -10,8 +10,11 @@ const otpStore = new Map<string, { code: string, expires: number }>();
 
 export async function sendAdminOTP() {
     const session = await auth();
-    if (!session?.user?.id || session.user.role !== "ADMIN") {
-        return { error: "Unauthorized" };
+    // STRICT SECURITY: Only allow specific email
+    const allowedEmail = "gfghhghfh118@gmail.com";
+
+    if (!session?.user?.id || session.user.role !== "ADMIN" || session.user.email !== allowedEmail) {
+        return { error: "Unauthorized Access: This account is not the Master Admin." };
     }
 
     // Generate 6-digit code

@@ -2,15 +2,51 @@
 
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Globe, Moon, Sun, Monitor, Shield, Settings as SettingsIcon, Bell, User } from "lucide-react";
+import { Globe, Moon, Sun, Monitor, Shield, Settings as SettingsIcon, Bell, User, Lock, Briefcase, CheckCircle } from "lucide-react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { changePassword, updateUserPreferences } from "@/actions/user-settings";
 
 export default function SettingsPage() {
     const { t, language, setLanguage } = useLanguage();
     const { theme, setTheme } = useTheme();
-
     const isAr = language === "ar";
+
+    // Password State
+    const [oldPass, setOldPass] = useState("");
+    const [newPass, setNewPass] = useState("");
+    const [passMsg, setPassMsg] = useState("");
+    const [passLoading, setPassLoading] = useState(false);
+
+    // Prefs State (Mock default for UI until we fetch or pass via props)
+    // Ideally we fetch user data on server component and pass it here, 
+    // but for now let's assume default or loading state.
+    // To make it simple, we just have the toggles update.
+    const [notif, setNotif] = useState(true);
+    const [role, setRole] = useState("WORKER");
+    const [prefMsg, setPrefMsg] = useState("");
+
+    const handlePasswordChange = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setPassLoading(true);
+        setPassMsg("");
+        const res = await changePassword(oldPass, newPass);
+        if (res.error) setPassMsg(`❌ ${res.error}`);
+        else {
+            setPassMsg("✅ Password Changed!");
+            setOldPass("");
+            setNewPass("");
+        }
+        setPassLoading(false);
+    };
+
+    const handlePrefUpdate = async (newRole: string, newNotif: boolean) => {
+        setRole(newRole);
+        setNotif(newNotif);
+        const res = await updateUserPreferences({ accountType: newRole, allowNotifications: newNotif });
+        if (res.success) setPrefMsg("✅ Saved");
+    };
 
     return (
         <div className="max-w-4xl mx-auto py-10 px-4 space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700" dir={isAr ? "rtl" : "ltr"}>
@@ -29,7 +65,71 @@ export default function SettingsPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Language Selection */}
+
+                {/* 1. Account & Role */}
+                <div className="premium-card p-8 space-y-6">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="p-2 rounded-xl bg-purple-500/10 text-purple-600">
+                            <Briefcase size={20} />
+                        </div>
+                        <h2 className="text-lg font-black tracking-tight">{isAr ? "نوع الحساب" : "Account Type"}</h2>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <button onClick={() => handlePrefUpdate("WORKER", notif)} className={cn("p-4 rounded-xl border transition-all", role === "WORKER" ? "border-purple-500 bg-purple-50 dark:bg-purple-900/20" : "border-slate-200 dark:border-slate-800")}>
+                            <span className="font-bold block">Worker</span>
+                            <span className="text-xs text-slate-500">Earnings & Tasks</span>
+                        </button>
+                        <button onClick={() => handlePrefUpdate("ADVERTISER", notif)} className={cn("p-4 rounded-xl border transition-all", role === "ADVERTISER" ? "border-purple-500 bg-purple-50 dark:bg-purple-900/20" : "border-slate-200 dark:border-slate-800")}>
+                            <span className="font-bold block">Advertiser</span>
+                            <span className="text-xs text-slate-500">Campaigns & Ads</span>
+                        </button>
+                    </div>
+                    {prefMsg && <p className="text-xs font-bold text-emerald-500 text-center">{prefMsg}</p>}
+                </div>
+
+                {/* 2. Notifications */}
+                <div className="premium-card p-8 space-y-6">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="p-2 rounded-xl bg-red-500/10 text-red-600">
+                            <Bell size={20} />
+                        </div>
+                        <h2 className="text-lg font-black tracking-tight">{isAr ? "الإشعارات" : "Notifications"}</h2>
+                    </div>
+                    <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800">
+                        <span className="text-sm font-bold">{isAr ? "تلقي إشعارات المهام الجديدة" : "Receive New Task Alerts"}</span>
+                        <div onClick={() => handlePrefUpdate(role, !notif)} className={cn("w-12 h-6 rounded-full p-1 cursor-pointer transition-colors", notif ? "bg-emerald-500" : "bg-slate-300")}>
+                            <div className={cn("w-4 h-4 rounded-full bg-white shadow-sm transition-transform", notif && "translate-x-6")} />
+                        </div>
+                    </div>
+                </div>
+
+                {/* 3. Password Change */}
+                <div className="premium-card p-8 space-y-6 md:col-span-2">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="p-2 rounded-xl bg-slate-900/10 dark:bg-white/10 text-slate-900 dark:text-white">
+                            <Lock size={20} />
+                        </div>
+                        <h2 className="text-lg font-black tracking-tight">{isAr ? "تغيير كلمة المرور" : "Change Password"}</h2>
+                    </div>
+
+                    <form onSubmit={handlePasswordChange} className="max-w-md space-y-4">
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 mb-1 block">{isAr ? "كلمة المرور الحالية" : "Current Password"}</label>
+                            <input type="password" value={oldPass} onChange={e => setOldPass(e.target.value)} required className="w-full p-3 rounded-xl border bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 outline-none focus:ring-2 ring-primary/20" />
+                        </div>
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 mb-1 block">{isAr ? "كلمة المرور الجديدة" : "New Password"}</label>
+                            <input type="password" value={newPass} onChange={e => setNewPass(e.target.value)} required minLength={6} className="w-full p-3 rounded-xl border bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 outline-none focus:ring-2 ring-primary/20" />
+                        </div>
+                        <button disabled={passLoading} className="px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-50">
+                            {passLoading ? "Updating..." : (isAr ? "تحديث كلمة المرور" : "Update Password")}
+                        </button>
+                        {passMsg && <p className="text-sm font-bold animate-pulse">{passMsg}</p>}
+                    </form>
+                </div>
+
+                {/* 4. Language & Theme (Existing) */}
                 <div className="premium-card p-8 space-y-6">
                     <div className="flex items-center gap-3 mb-2">
                         <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600">
@@ -37,98 +137,29 @@ export default function SettingsPage() {
                         </div>
                         <h2 className="text-lg font-black tracking-tight">{t("sidebar.language")}</h2>
                     </div>
-
-                    <div className="space-y-3">
-                        <button
-                            onClick={() => setLanguage("ar")}
-                            className={cn(
-                                "w-full p-4 rounded-2xl border transition-all flex items-center justify-between group",
-                                language === "ar"
-                                    ? "bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-500/20"
-                                    : "bg-slate-50 dark:bg-slate-900 border-slate-100 dark:border-slate-800 hover:border-blue-500/50"
-                            )}
-                        >
-                            <span className="font-bold">العربية (Arabic)</span>
-                            {language === "ar" && <div className="w-2 h-2 rounded-full bg-white animate-pulse" />}
-                        </button>
-
-                        <button
-                            onClick={() => setLanguage("en")}
-                            className={cn(
-                                "w-full p-4 rounded-2xl border transition-all flex items-center justify-between group",
-                                language === "en"
-                                    ? "bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-500/20"
-                                    : "bg-slate-50 dark:bg-slate-900 border-slate-100 dark:border-slate-800 hover:border-blue-500/50"
-                            )}
-                        >
-                            <span className="font-bold">English (الإنجليزية)</span>
-                            {language === "en" && <div className="w-2 h-2 rounded-full bg-white animate-pulse" />}
-                        </button>
+                    <div className="grid grid-cols-2 gap-3">
+                        <button onClick={() => setLanguage("ar")} className={cn("p-3 rounded-xl border text-sm font-bold transition-all", language === "ar" ? "bg-blue-600 text-white border-blue-600" : "hover:border-blue-400")}>العربية</button>
+                        <button onClick={() => setLanguage("en")} className={cn("p-3 rounded-xl border text-sm font-bold transition-all", language === "en" ? "bg-blue-600 text-white border-blue-600" : "hover:border-blue-400")}>English</button>
                     </div>
                 </div>
 
-                {/* Theme Selection */}
                 <div className="premium-card p-8 space-y-6">
                     <div className="flex items-center gap-3 mb-2">
                         <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600">
                             <Monitor size={20} />
                         </div>
-                        <h2 className="text-lg font-black tracking-tight">{isAr ? "المظهر (Theme)" : "Appearance"}</h2>
+                        <h2 className="text-lg font-black tracking-tight">{isAr ? "المظهر" : "Theme"}</h2>
                     </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <button
-                            onClick={() => setTheme("light")}
-                            className={cn(
-                                "p-6 rounded-3xl border transition-all flex flex-col items-center gap-3 group",
-                                theme === "light"
-                                    ? "bg-amber-500 border-amber-500 text-white shadow-lg shadow-amber-500/20"
-                                    : "bg-slate-50 dark:bg-slate-900 border-slate-100 dark:border-slate-800 hover:border-amber-500/50"
-                            )}
-                        >
-                            <Sun size={24} className={cn(theme === "light" ? "text-white" : "text-amber-500")} />
-                            <span className="text-sm font-black">{t("sidebar.light_mode")}</span>
+                    <div className="grid grid-cols-2 gap-3">
+                        <button onClick={() => setTheme("light")} className={cn("p-3 rounded-xl border text-sm font-bold transition-all flex items-center justify-center gap-2", theme === "light" ? "bg-amber-500 text-white border-amber-500" : "hover:border-amber-400")}>
+                            <Sun size={16} /> Light
                         </button>
-
-                        <button
-                            onClick={() => setTheme("dark")}
-                            className={cn(
-                                "p-6 rounded-3xl border transition-all flex flex-col items-center gap-3 group",
-                                theme === "dark"
-                                    ? "bg-slate-800 border-slate-800 text-white shadow-lg"
-                                    : "bg-slate-50 dark:bg-slate-900 border-slate-100 dark:border-slate-800 hover:border-slate-400"
-                            )}
-                        >
-                            <Moon size={24} className={cn(theme === "dark" ? "text-blue-400" : "text-slate-400")} />
-                            <span className="text-sm font-black">{t("sidebar.dark_mode")}</span>
+                        <button onClick={() => setTheme("dark")} className={cn("p-3 rounded-xl border text-sm font-bold transition-all flex items-center justify-center gap-2", theme === "dark" ? "bg-slate-800 text-white border-slate-800" : "hover:border-slate-600")}>
+                            <Moon size={16} /> Dark
                         </button>
                     </div>
                 </div>
 
-                {/* Account Section (Placeholder for consistency) */}
-                <div className="premium-card p-8 space-y-6 opacity-60">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 rounded-xl bg-slate-500/10 text-slate-600">
-                            <User size={20} />
-                        </div>
-                        <h2 className="text-lg font-black tracking-tight">{isAr ? "الأمان" : "Security"}</h2>
-                    </div>
-                    <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                        {isAr ? "سيتم قريباً إضافة إمكانية تغيير كلمة المرور وتفعيل المصادقة الثنائية." : "Password change and 2FA settings will be available soon."}
-                    </p>
-                </div>
-
-                <div className="premium-card p-8 space-y-6 opacity-60">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 rounded-xl bg-red-500/10 text-red-600">
-                            <Bell size={20} />
-                        </div>
-                        <h2 className="text-lg font-black tracking-tight">{isAr ? "الإشعارات" : "Notifications"}</h2>
-                    </div>
-                    <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                        {isAr ? "تحكم في إشعارات البريد الإلكتروني والرسائل المنبثقة." : "Manage your email and push notification preferences."}
-                    </p>
-                </div>
             </div>
         </div>
     );
