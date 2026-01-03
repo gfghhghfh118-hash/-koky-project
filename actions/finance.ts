@@ -19,10 +19,59 @@ export async function requestWithdrawal(formData: FormData) {
     // If EGP, convert amount to USD for validation and deduction
     const amountInUSD = isEGP ? amount / EXCHANGE_RATE : amount;
 
-    // Minimum USD limit (e.g. 0.2 USD = 10 EGP)
-    if (!amountInUSD || amountInUSD < 0.2) return { error: `Minimum withdrawal is $0.20 (approx. ${0.2 * EXCHANGE_RATE} EGP)` };
-    if (!wallet || wallet.length < 10) return { error: "Invalid wallet number" };
-    if (!["VODAFONE_CASH", "ETISALAT", "INSTAPAY", "FAUCETPAY_USDT", "USDT_BEP20"].includes(method)) return { error: "Invalid method" };
+    // --------------------------------------------------------
+    // DYNAMIC PAYMENT METHOD CHECK
+    // --------------------------------------------------------
+    // Find the method in DB (Active only)
+    const paymentMethodRecord = await db.paymentMethod.findFirst({
+        where: {
+            name: method, // Assuming 'method' passed from form matches 'name' in DB or we map it. 
+            // Note: In the form, values might be slugs like "VODAFONE_CASH". 
+            // The seed uses "Vodafone Cash". We need to align this.
+            // For now, let's assume the form sends the exact NAME or we find by ID if we change the form.
+            // *CRITICAL*: The current frontend sends "VODAFONE_CASH". We should probably update the form 
+            // or map it. To be safe, let's try to find it by name or map the old keys.
+            // Better yet: Update the form to send the ID. But that's a frontend change.
+            // Let's try to match loosely or fix the seeding to use the keys.
+            // ACTUALLY: The best way is to fetch the method by ID from the frontend.
+            // But to avoid breaking changes without frontend edits right now:
+            // I will match by Name OR 'like' name.
+            // However, the cleanest is to update the 'requestWithdrawal' to accept an 'methodId' if possible.
+            // If not, I will rely on the string match.
+            // Let's assume the user selects from the new dynamic list in the future.
+            // FOR NOW: I will map legacy keys to the new DB names.
+            type: "WITHDRAWAL",
+            isActive: true
+        }
+    });
+
+    // If not found by exact name, try mapping legacy keys
+    let dbMethod = paymentMethodRecord;
+    if (!dbMethod) {
+        const legacyMap: Record<string, string> = {
+            "VODAFONE_CASH": "Vodafone Cash",
+            "ETISALAT": "Etisalat Cash",
+            "INSTAPAY": "Instapay",
+            "FAUCETPAY_USDT": "FaucetPay (USDT)",
+            "USDT_BEP20": "USDT (BEP20)"
+        };
+        if (legacyMap[method]) {
+            dbMethod = await db.paymentMethod.findFirst({
+                where: { name: legacyMap[method], type: "WITHDRAWAL", isActive: true }
+            });
+        }
+    }
+
+    if (!dbMethod) return { error: "Payment method not available or disabled." };
+
+    // Validate Limits (DB values are in USD usually, or we assume they are)
+    // NOTE: The DB seed has min 1, max 500. Assuming USD.
+    if (amountInUSD < dbMethod.minAmount) return { error: `Minimum withdrawal is $${dbMethod.minAmount}` };
+    if (amountInUSD > dbMethod.maxAmount) return { error: `Maximum withdrawal is $${dbMethod.maxAmount}` };
+
+    // Calculate Fee
+    const feeAmount = (amountInUSD * dbMethod.feePercent) / 100;
+    const finalAmountAfterFee = amountInUSD - feeAmount;
 
     try {
         const user = await db.user.findUnique({ where: { id: userId } });
@@ -31,7 +80,7 @@ export async function requestWithdrawal(formData: FormData) {
         // Transactional consistency: Deduct balance AND create log
         await db.$transaction(async (tx) => {
 
-            // 1. Deduct Balance (Always in USD)
+            // 1. Deduct Balance (Full Amount)
             await tx.user.update({
                 where: { id: userId },
                 data: { balance: { decrement: amountInUSD } }
@@ -41,13 +90,24 @@ export async function requestWithdrawal(formData: FormData) {
             await tx.transaction.create({
                 data: {
                     userId,
-                    amount: amountInUSD, // Store normalized USD amount
+                    amount: finalAmountAfterFee, // Net amount user receives
                     type: "WITHDRAWAL",
-                    method,
+                    method: dbMethod!.name, // Store the nice name
                     wallet: `${wallet} ${isEGP ? `(Requested: ${amount} EGP)` : ""}`,
                     status: "PENDING"
                 }
             });
+
+            // 3. Log Fee if any
+            if (feeAmount > 0) {
+                await tx.adminProfitLog.create({
+                    data: {
+                        source: "WITHDRAWAL_FEE",
+                        amount: feeAmount,
+                        description: `${dbMethod!.feePercent}% fee on ${dbMethod!.name} withdrawal`
+                    }
+                });
+            }
         });
 
         revalidatePath("/dashboard");

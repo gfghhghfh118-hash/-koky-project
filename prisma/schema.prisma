@@ -79,6 +79,7 @@ model Transaction {
   fee           Float    @default(0.0) // 1% Platform Fee
   netAmount     Float    @default(0.0) // Amount after fee
   adminActionId String?  // ID of admin who approved/rejected
+  description   String?  // Description of the transaction (e.g., refund reason)
   
   user          User           @relation(fields: [userId], references: [id])
   commissions   CommissionLog[]
@@ -168,4 +169,17 @@ model Banner {
   createdAt DateTime @default(now())
 
   @@index([userId])
+}
+
+model PaymentMethod {
+  id          String   @id @default(uuid())
+  name        String   // e.g. "Vodafone Cash", "USDT"
+  type        String   // "DEPOSIT" or "WITHDRAWAL"
+  instruction String?  // e.g. Wallet Address, Instructions
+  feePercent  Float    @default(0.0)
+  minAmount   Float    @default(1.0)
+  maxAmount   Float    @default(1000.0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

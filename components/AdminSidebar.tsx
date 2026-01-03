@@ -2,14 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, DollarSign, Settings, LogOut, MessageSquare } from "lucide-react";
+import { LayoutDashboard, Users, DollarSign, Settings, LogOut, MessageSquare, ShieldAlert, CreditCard } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { logout } from "@/actions/logout";
 
 const navItems = [
     { name: "لوحة التحكم", href: "/admin", icon: LayoutDashboard },
     { name: "الطلبات المالية", href: "/admin/financials", icon: DollarSign },
+    { name: "وسائل الدفع", href: "/admin/financials/methods", icon: CreditCard },
     { name: "المستخدمين", href: "/admin/users", icon: Users },
+    { name: "الإشراف والحظر", href: "/admin/moderation", icon: ShieldAlert },
     { name: "تذاكر الدعم", href: "/admin/tickets", icon: MessageSquare },
     { name: "مراقبة الأرباح", href: "/admin/accounting", icon: LayoutDashboard },
     { name: "الإعدادات", href: "/admin/settings", icon: Settings },

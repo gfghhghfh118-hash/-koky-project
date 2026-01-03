@@ -1,8 +1,11 @@
 import { UserSidebar } from "@/components/UserSidebar";
+import { SidebarAds } from "@/components/SidebarAds";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { BannerSlot } from "@/components/BannerSlot";
 import { getBannerBatch } from "@/actions/banners";
+import { TopBannerSection } from "@/components/banners/TopBannerSection";
+import { BottomBannerSection } from "@/components/banners/BottomBannerSection";
 
 export default async function UserLayout({
     children,
@@ -13,10 +16,9 @@ export default async function UserLayout({
     console.log("[Dashboard Layout] Session User ID:", session?.user?.id);
 
     // Fetch unique banners batch for the whole page
+    // Optimization: Only fetch SIDEBAR here, as Top/Bottom manage their own data
     const banners = await getBannerBatch([
-        { type: "TOP_HEADER", count: 2 },
-        { type: "SIDEBAR", count: 2 },
-        { type: "FOOTER", count: 2 }
+        { type: "SIDEBAR", count: 2 }
     ]);
 
     let balance = 0;
@@ -37,26 +39,18 @@ export default async function UserLayout({
                 adBalance={adBalance}
                 role={role}
                 sidebarBanner={
-                    <div className="flex flex-col gap-4">
-                        <BannerSlot type="SIDEBAR" manualData={banners["SIDEBAR"]?.[0] || null} />
-                        <BannerSlot type="SIDEBAR" manualData={banners["SIDEBAR"]?.[1] || null} />
-                    </div>
+                    <SidebarAds ads={banners["SIDEBAR"] || []} />
                 }
             />
             <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-muted/30">
                 <div className="max-w-6xl mx-auto space-y-6">
-                    {/* Top Header Banner Slot */}
-                    <div className="w-full flex flex-col gap-4">
-                        <BannerSlot type="TOP_HEADER" manualData={banners["TOP_HEADER"]?.[0] || null} />
-                        <BannerSlot type="TOP_HEADER" manualData={banners["TOP_HEADER"]?.[1] || null} />
-                    </div>
+                    {/* --- GLOBAL TOP BANNER SECTION --- */}
+                    <TopBannerSection />
+
                     {children}
 
-                    {/* Footer Banner Slot */}
-                    <div className="w-full mt-10 flex flex-col gap-4">
-                        <BannerSlot type="FOOTER" manualData={banners["FOOTER"]?.[0] || null} />
-                        <BannerSlot type="FOOTER" manualData={banners["FOOTER"]?.[1] || null} />
-                    </div>
+                    {/* --- GLOBAL BOTTOM BANNER SECTION --- */}
+                    <BottomBannerSection />
                 </div>
             </main>
         </div>

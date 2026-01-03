@@ -2,19 +2,61 @@ import NextAuth from "next-auth";
 import { authConfig } from "@/auth.config";
 
 export default NextAuth(authConfig).auth((req) => {
-    const isDashboard = req.nextUrl.pathname.startsWith("/dashboard");
-    const isAdmin = req.auth?.user?.role === "ADMIN";
+    // ----------------------------------------------------------------------
+    // GEO BLOCKING: Block access from Israel (IL)
+    // ----------------------------------------------------------------------
+    const country = (req as any).geo?.country || req.headers.get("x-vercel-ip-country");
 
-    // Strict Admin Redirect: If Admin tries to go to Dashboard, send to Admin Panel
-    // BUT allow access to Referrals and Settings page for testing
-    /*
-    if (isDashboard && isAdmin) {
-        if (!req.nextUrl.pathname.includes("/invite") && !req.nextUrl.pathname.includes("/settings")) {
-            const newUrl = new URL("/admin", req.nextUrl.origin);
-            return Response.redirect(newUrl);
+    // Prevent infinite redirect loop: Don't redirect if already on /blocked
+    if (country === "IL" && !req.nextUrl.pathname.startsWith("/blocked")) {
+        return Response.redirect(new URL("/blocked", req.nextUrl.origin));
+    }
+    // ----------------------------------------------------------------------
+
+    // ----------------------------------------------------------------------
+    const { pathname } = req.nextUrl;
+    const isDashboard = pathname.startsWith("/dashboard");
+    const isAdminRoute = pathname.startsWith("/admin");
+    const isAdminUser = req.auth?.user?.role === "ADMIN";
+
+    // ADMIN 2FA & LOCATION PROTECTION
+    if (isAdminRoute && isAdminUser) {
+        // 1. LOCATION CHECK (Skip on Localhost)
+        const host = req.headers.get("host") || "";
+        const isLocalhost = host.includes("localhost") || host.includes("127.0.0.1");
+
+        if (!isLocalhost && process.env.NODE_ENV === "production") {
+            const city = req.headers.get("x-vercel-ip-city") || "";
+            const region = req.headers.get("x-vercel-ip-region") || "";
+            console.log(`[Admin Access Attempt] IP City: ${city}, Region: ${region}`);
+
+            // User requested "El Marg, Cairo". 
+            // IP Geo usually returns "Cairo". We allow both to prevent lockout.
+            const allowedLocations = ["Cairo", "El Marg", "Al Marg", "Ezbet El Nakhl"];
+            const isAllowed = allowedLocations.some(loc =>
+                city.toLowerCase().includes(loc.toLowerCase()) ||
+                region.toLowerCase().includes(loc.toLowerCase())
+            );
+
+            if (!isAllowed) {
+                console.log(`[Admin Blocked] Location Mismatch. User is in: ${city}, ${region}`);
+                // Redirect to a specific blocked page or generic
+                return Response.redirect(new URL("/blocked", req.nextUrl.origin));
+            }
+        }
+
+        // 2. 2FA CHECK
+        // Allow access to verify page without loop
+        if (pathname === "/admin/verify") return;
+
+        // Check for 2FA cookie
+        const isVerified = req.cookies.get("ADMIN_2FA_VERIFIED")?.value === "true";
+
+        if (!isVerified) {
+            return Response.redirect(new URL("/admin/verify", req.nextUrl.origin));
         }
     }
-    */
+    // ----------------------------------------------------------------------
 });
 
 export const config = {
