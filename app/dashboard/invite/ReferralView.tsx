@@ -81,8 +81,10 @@ export function ReferralView({ stats }: { stats: ReferralStats }) {
                     <div className="flex gap-2">
                         <Input value={stats.referralLink} readOnly className="font-mono bg-muted" />
                         <Button onClick={handleCopy} className="min-w-[100px]">
-                            {copied ? <Check size={16} className="mr-2" /> : <Copy size={16} className="mr-2" />}
-                            {copied ? t("referrals.copied") : t("referrals.copy")}
+                            <span className="flex items-center gap-2">
+                                {copied ? <Check size={16} /> : <Copy size={16} />}
+                                <span>{copied ? t("referrals.copied") : t("referrals.copy")}</span>
+                            </span>
                         </Button>
                     </div>
                 </CardContent>
