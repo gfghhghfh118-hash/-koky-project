@@ -9,9 +9,16 @@ export default async function EarnPage() {
     const session = await auth();
     if (!session?.user) return <div className="p-8 h-40 flex items-center justify-center glass rounded-2xl text-slate-500 font-bold">{t('auth.authorization')}</div>;
 
-    // Get tasks that are active, sorted by highest payout first
+    // Get tasks that are active AND not completed by this user
     const tasks = await db.task.findMany({
-        where: { active: true },
+        where: {
+            active: true,
+            logs: {
+                none: {
+                    userId: session.user.id
+                }
+            }
+        },
         orderBy: { userPayout: "desc" }
     });
 

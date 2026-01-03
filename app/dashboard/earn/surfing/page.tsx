@@ -26,7 +26,12 @@ export default async function SurfingPage({
         const nextTask = await db.task.findFirst({
             where: {
                 active: true,
-                type: "SURFING" // Only auto-surf SURFING tasks, not YOUTUBE or generic TASKS
+                type: "SURFING", // Only auto-surf SURFING tasks
+                logs: {
+                    none: {
+                        userId: session.user?.id
+                    }
+                }
             },
             orderBy: { userPayout: "desc" }
         });
