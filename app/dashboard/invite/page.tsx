@@ -31,8 +31,17 @@ export default async function ReferralPage() {
 
     if (!user) {
         console.error(">>>>>>>> [Referral Page ERROR] User not found in DB for ID:", session.user.id);
-        // Force signout to clear bad cookie
-        redirect("/api/auth/signout");
+        return (
+            <div className="p-8 flex flex-col items-center justify-center text-center space-y-4">
+                <div className="p-4 rounded-full bg-red-50 text-red-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></svg>
+                </div>
+                <div>
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-white">Account Sync Error</h3>
+                    <p className="text-slate-500 max-w-xs mx-auto">We couldn't load your referral data. Please try refreshing the page.</p>
+                </div>
+            </div>
+        );
     }
     // console.log(">>>>>>>> [Referral Page DEBUG] User found:", user.username);
 
