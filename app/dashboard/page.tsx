@@ -41,7 +41,7 @@ export default async function UserDashboard() {
             </div>
 
             {/* Referral Promotion Banner */}
-            <Link href="/dashboard/referrals" className="block transform transition-all hover:scale-[1.01] active:scale-[0.99]">
+            <Link href="/dashboard/invite" className="block transform transition-all hover:scale-[1.01] active:scale-[0.99]">
                 <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-8 text-white shadow-2xl shadow-indigo-500/20 group">
                     <div className="absolute top-0 right-0 -mr-20 -mt-20 h-64 w-64 rounded-full bg-white/10 blur-3xl transition-transform group-hover:scale-150" />
                     <div className="absolute bottom-0 left-0 -ml-20 -mb-20 h-64 w-64 rounded-full bg-pink-500/20 blur-3xl" />
