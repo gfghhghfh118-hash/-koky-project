@@ -5,6 +5,8 @@ import { Youtube, MousePointerClick, Briefcase, Plus, Signal, Megaphone, Trendin
 import AdBalanceExchange from "@/components/AdBalanceExchange";
 import DeleteCampaignButton from "@/components/DeleteCampaignButton";
 
+export const dynamic = "force-dynamic";
+
 export default async function ManageCampaigns() {
     try {
         const session = await auth();
