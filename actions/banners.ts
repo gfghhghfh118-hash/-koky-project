@@ -114,39 +114,47 @@ export async function getBannerBatch(requirements: { type: string, count: number
     const results: Record<string, any[]> = {};
 
     // For each requirement, fetch candidates
-    for (const req of requirements) {
-        // 1. Fetch valid banners
-        const activeBanners = await db.banner.findMany({
-            where: {
-                type: req.type,
-                active: true,
-                OR: [
-                    { expiresAt: { gt: new Date() } },
-                    { days: 0 }
-                ],
-            },
-            take: 100 // Fetch a pool to pick from
-        });
+    try {
+        for (const req of requirements) {
+            // 1. Fetch valid banners (try/catch per loop or global?) Global is safer for DB connection issues.
+            const activeBanners = await db.banner.findMany({
+                where: {
+                    type: req.type,
+                    active: true,
+                    OR: [
+                        { expiresAt: { gt: new Date() } },
+                        { days: 0 }
+                    ],
+                },
+                take: 100 // Fetch a pool to pick from
+            });
 
-        // Filter limits
-        const candidates = activeBanners.filter(b => {
-            if (b.targetViews > 0 && b.views >= b.targetViews) return false;
-            if (b.targetClicks > 0 && b.clicks >= b.targetClicks) return false;
-            return true;
-        });
+            // Filter limits
+            const candidates = activeBanners.filter(b => {
+                if (b.targetViews > 0 && b.views >= b.targetViews) return false;
+                if (b.targetClicks > 0 && b.clicks >= b.targetClicks) return false;
+                return true;
+            });
 
-        // Pick unique randoms
-        const picked = getRandomUnique(candidates, req.count);
-        results[req.type] = picked;
+            // Pick unique randoms
+            const picked = getRandomUnique(candidates, req.count);
+            results[req.type] = picked;
 
-        // Async increment view stats for picked ones
-        if (picked.length > 0) {
-            try {
-                await db.banner.updateMany({
-                    where: { id: { in: picked.map((b: any) => b.id) } },
-                    data: { views: { increment: 1 } }
-                });
-            } catch (e) { /* ignore */ }
+            // Async increment view stats for picked ones
+            if (picked.length > 0) {
+                try {
+                    await db.banner.updateMany({
+                        where: { id: { in: picked.map((b: any) => b.id) } },
+                        data: { views: { increment: 1 } }
+                    });
+                } catch (e) { /* ignore view increment error */ }
+            }
+        }
+    } catch (e) {
+        console.error("Failed to fetch banners (DB Error):", e);
+        // Fallback: return empty results so the page doesn't crash
+        for (const req of requirements) {
+            results[req.type] = [];
         }
     }
 
