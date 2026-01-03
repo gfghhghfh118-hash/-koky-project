@@ -7,10 +7,8 @@ import { UserPlus, Globe, CheckCircle, Smartphone, DollarSign, Users } from "luc
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import { Social } from "@/components/auth/Social";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { setReferralCookie } from "@/actions/referrals";
-
-import { Suspense } from "react";
 
 function RegisterForm() {
     const [errorMessage, dispatch, isPending] = useActionState(register, undefined);
@@ -240,7 +238,7 @@ function RegisterForm() {
 }
 
 // Wrap with Suspense
-export default function RegisterPage() {
+export default function RegisterContent() {
     return (
         <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-slate-50"><div className="w-8 h-8 rounded-full border-4 border-slate-200 border-t-blue-600 animate-spin" /></div>}>
             <RegisterForm />
