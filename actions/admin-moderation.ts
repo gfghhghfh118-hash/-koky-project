@@ -83,8 +83,8 @@ export async function getModerationFeed() {
             // We'll trust the quantity check below.
             orderBy: { createdAt: "desc" },
             include: {
-                user: {
-                    select: { name: true, email: true }
+                creator: {
+                    select: { username: true, email: true }
                 }
             },
             take: 100
