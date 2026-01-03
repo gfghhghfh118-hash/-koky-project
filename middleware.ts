@@ -17,9 +17,16 @@ export default NextAuth(authConfig).auth((req) => {
     const { pathname } = req.nextUrl;
     const isDashboard = pathname.startsWith("/dashboard");
     const isAdminRoute = pathname.startsWith("/admin");
+    const isAuthRoute = pathname.startsWith("/login") || pathname.startsWith("/register");
+    const isLoggedIn = !!req.auth;
     const isAdminUser = req.auth?.user?.role === "ADMIN";
     const userEmail = req.auth?.user?.email;
     const MASTER_ADMIN_EMAIL = "gfghhghfh118@gmail.com";
+
+    // REDIRECT LOGGED-IN USERS FROM AUTH PAGES
+    if (isLoggedIn && isAuthRoute) {
+        return Response.redirect(new URL("/dashboard", req.nextUrl.origin));
+    }
 
     // ADMIN 2FA & LOCATION PROTECTION
     if (isAdminRoute && isAdminUser) {
