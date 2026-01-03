@@ -14,12 +14,10 @@ export async function generateMetadata(
     const ref = params.ref as string;
 
     const title = ref
-        ? `Join ${ref} on Koky.bz & Start Earning!`
-        : "Create Account | Koky.bz - Earn Money Online";
+        ? `دعوة خاصة من ${ref} للانضمام إلى Koky.bz 🎁`
+        : "سجل الآن وابدأ الربح | Koky.bz";
 
-    const description = ref
-        ? `${ref} has invited you to join Koky.bz. Sign up now to earn money by watching ads, completing tasks, and more. Instant withdrawals!`
-        : "Join the fastest growing earning platform. Watch ads, complete tasks, and get paid instantly.";
+    const description = "فرصة عمل من المنزل لا تعوض! اربح دولارات يومياً من خلال مشاهدة الإعلانات وتنفيذ المهام البسيطة. سحب فوري للأرباح. انضم الآن!";
 
     return {
         title: title,
@@ -27,6 +25,7 @@ export async function generateMetadata(
         openGraph: {
             title: title,
             description: description,
+            type: 'website',
         },
         twitter: {
             card: 'summary_large_image',
