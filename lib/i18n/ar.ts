@@ -35,6 +35,7 @@ export const ar = {
         profile: "الملف الشخصي",
         logout: "تسجيل خروج",
         admin_dashboard: "لوحة المدير",
+        users_management: "إدارة المستخدمين",
         // Items
         surfing: "تصفح إعلانات",
         youtube: "يوتيوب",

@@ -21,7 +21,32 @@ export default async function SurfingPage({
     const taskId = params.taskId as string;
 
     if (!taskId) {
-        redirect("/dashboard/earn");
+        console.log(">>> [SurfingPage] No taskId provided. Checking for active SURFING tasks...");
+        // Auto-select the highest paying active task
+        const nextTask = await db.task.findFirst({
+            where: {
+                active: true,
+                type: "SURFING" // Only auto-surf SURFING tasks, not YOUTUBE or generic TASKS
+            },
+            orderBy: { userPayout: "desc" }
+        });
+
+        console.log(">>> [SurfingPage] Found Next Task:", nextTask);
+
+        if (nextTask) {
+            console.log(">>> [SurfingPage] Redirecting to:", `/dashboard/earn/surfing?taskId=${nextTask.id}`);
+            redirect(`/dashboard/earn/surfing?taskId=${nextTask.id}`);
+        } else {
+            console.log(">>> [SurfingPage] No active SURFING tasks found.");
+            // Instead of redirecting to list (which might confuse user), show a "No Tasks" message
+            return (
+                <div className="min-h-screen flex flex-col items-center justify-center p-8 text-center space-y-4">
+                    <h1 className="text-2xl font-bold">No Surfing Tasks Available</h1>
+                    <p className="text-slate-500">There are currently no active websites to surf. Please check back later.</p>
+                    <a href="/dashboard/earn" className="text-blue-500 hover:underline">Return to Earn Page</a>
+                </div>
+            );
+        }
     }
 
     const task = await db.task.findUnique({

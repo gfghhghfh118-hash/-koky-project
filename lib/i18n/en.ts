@@ -35,6 +35,7 @@ export const en = {
         profile: "Profile",
         logout: "Logout",
         admin_dashboard: "Admin Dashboard",
+        users_management: "Users Management",
         // Items
         surfing: "Surfing",
         youtube: "YouTube",

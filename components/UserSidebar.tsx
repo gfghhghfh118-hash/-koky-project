@@ -72,13 +72,22 @@ export function UserSidebar({ balance, adBalance, role, sidebarBanner }: UserSid
                 {/* Main Section */}
                 <div>
                     {role === "ADMIN" && (
-                        <Link
-                            href="/admin"
-                            className={cn(linkBaseClass, pathname.startsWith("/admin") && activeLinkClass, "rounded-lg border-l-0 mx-2 mb-2 bg-red-500/10 text-red-600 hover:bg-red-500/20 hover:text-red-700 dark:bg-red-500/20 dark:text-red-400 dark:hover:bg-red-500/30")}
-                        >
-                            <LayoutDashboard size={18} className="text-red-500" />
-                            <span className="tracking-tight font-bold">{t("sidebar.admin_dashboard")}</span>
-                        </Link>
+                        <>
+                            <Link
+                                href="/admin"
+                                className={cn(linkBaseClass, pathname === "/admin" && activeLinkClass, "rounded-lg border-l-0 mx-2 mb-1 bg-red-500/10 text-red-600 hover:bg-red-500/20 hover:text-red-700 dark:bg-red-500/20 dark:text-red-400 dark:hover:bg-red-500/30")}
+                            >
+                                <LayoutDashboard size={18} className="text-red-500" />
+                                <span className="tracking-tight font-bold">{t("sidebar.admin_dashboard")}</span>
+                            </Link>
+                            <Link
+                                href="/admin/users"
+                                className={cn(linkBaseClass, pathname.startsWith("/admin/users") && activeLinkClass, "rounded-lg border-l-0 mx-2 mb-2 bg-red-500/10 text-red-600 hover:bg-red-500/20 hover:text-red-700 dark:bg-red-500/20 dark:text-red-400 dark:hover:bg-red-500/30")}
+                            >
+                                <Users size={18} className="text-red-500" />
+                                <span className="tracking-tight font-bold">{t("sidebar.users_management")}</span>
+                            </Link>
+                        </>
                     )}
                     <Link
                         href="/dashboard"

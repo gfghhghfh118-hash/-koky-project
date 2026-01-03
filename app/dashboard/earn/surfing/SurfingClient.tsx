@@ -127,12 +127,18 @@ export function SurfingClient({ task }: { task: any }) {
 
             {/* Iframe Content Container */}
             <div className="flex-1 bg-white relative">
+                {/* Debug Info for User */}
+                <div className="absolute top-0 left-0 right-0 z-20 bg-slate-900 text-white text-[10px] p-1 flex justify-between px-4 opacity-80 hover:opacity-100 transition-opacity">
+                    <span>Loading: {task.url}</span>
+                    <a href={task.url} target="_blank" rel="noopener noreferrer" className="text-blue-300 hover:text-white underline">Open in New Tab</a>
+                </div>
+
                 {/* Premium subtle shadow overlay on top of iframe */}
-                <div className="absolute inset-x-0 top-0 h-4 bg-gradient-to-b from-black/10 to-transparent pointer-events-none z-10" />
+                <div className="absolute inset-x-0 top-4 h-4 bg-gradient-to-b from-black/10 to-transparent pointer-events-none z-10" />
 
                 <iframe
                     src={task.url || "https://example.com"}
-                    className="w-full h-full border-none"
+                    className="w-full h-full border-none pt-6" // pt-6 to account for debug bar
                     allow="autoplay; fullscreen"
                     title="Ad Content"
                 />
