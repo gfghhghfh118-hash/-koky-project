@@ -139,28 +139,37 @@ export default function Home() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+                        {/* Feature 1: Simple Tasks */}
                         <div className="text-center group">
                             <div className="bg-blue-50 w-20 h-20 rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-blue-600 group-hover:scale-110 transition-transform">
                                 <MousePointerClick size={36} />
                             </div>
-                            <h3 className="text-xl font-extrabold mb-3 text-slate-800">{t("landing.features.tasks")}</h3>
-                            <p className="text-slate-500 text-sm leading-relaxed px-4">{t("landing.features.tasks_desc")}</p>
+                            <h3 className="text-xl font-extrabold mb-3 text-slate-800">Simple Tasks</h3>
+                            <p className="text-slate-500 text-sm leading-relaxed px-4">
+                                Earn money by completing simple micro-tasks like signing up for websites, liking posts, or testing apps.
+                            </p>
                         </div>
 
+                        {/* Feature 2: Watch Videos */}
+                        <div className="text-center group">
+                            <div className="bg-red-50 w-20 h-20 rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-red-600 group-hover:scale-110 transition-transform">
+                                <ArrowRight size={36} /> {/* Using ArrowRight temporarily as Play icon might not be imported, checking imports next */}
+                            </div>
+                            <h3 className="text-xl font-extrabold mb-3 text-slate-800">Watch Videos</h3>
+                            <p className="text-slate-500 text-sm leading-relaxed px-4">
+                                Get paid to watch YouTube videos. Just sit back, watch engaging content, and grow your balance.
+                            </p>
+                        </div>
+
+                        {/* Feature 3: Surf Ads */}
                         <div className="text-center group">
                             <div className="bg-green-50 w-20 h-20 rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-green-600 group-hover:scale-110 transition-transform">
-                                <DollarSign size={36} />
+                                <Globe size={36} />
                             </div>
-                            <h3 className="text-xl font-extrabold mb-3 text-slate-800">{t("landing.features.payouts")}</h3>
-                            <p className="text-slate-500 text-sm leading-relaxed px-4">{t("landing.features.payouts_desc")}</p>
-                        </div>
-
-                        <div className="text-center group">
-                            <div className="bg-purple-50 w-20 h-20 rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-purple-600 group-hover:scale-110 transition-transform">
-                                <ShieldCheck size={36} />
-                            </div>
-                            <h3 className="text-xl font-extrabold mb-3 text-slate-800">{t("landing.features.security")}</h3>
-                            <p className="text-slate-500 text-sm leading-relaxed px-4">{t("landing.features.security_desc")}</p>
+                            <h3 className="text-xl font-extrabold mb-3 text-slate-800">Surf Websites</h3>
+                            <p className="text-slate-500 text-sm leading-relaxed px-4">
+                                Browse our advertiser's websites and get paid instantly for every visit. It's the easiest way to earn.
+                            </p>
                         </div>
                     </div>
                 </div>

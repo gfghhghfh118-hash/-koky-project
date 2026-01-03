@@ -32,6 +32,16 @@ function RegisterForm() {
         }
     }, [ref]);
 
+    // Captcha State
+    const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, answer: 0 });
+
+    useEffect(() => {
+        // Generate random numbers for captcha only on client
+        const n1 = Math.floor(Math.random() * 10);
+        const n2 = Math.floor(Math.random() * 10);
+        setCaptcha({ num1: n1, num2: n2, answer: n1 + n2 });
+    }, []);
+
     return (
         <div className="flex min-h-screen w-full items-center justify-center bg-muted p-4">
             <div className="w-full max-w-sm bg-white border border-gray-200 rounded p-8 shadow-sm">
@@ -48,7 +58,18 @@ function RegisterForm() {
                     )}
                 </div>
 
-                <form action={dispatch} className="space-y-4">
+                <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded text-xs text-amber-700 font-medium">
+                    Please Note: <strong>Only one account per user is allowed.</strong> Multiple accounts will result in a permanent ban.
+                </div>
+
+                <form action={(formData) => {
+                    const mathAnswer = formData.get("captcha") as string;
+                    if (parseInt(mathAnswer) !== captcha.answer) {
+                        alert("Incorrect Captcha Answer");
+                        return;
+                    }
+                    dispatch(formData);
+                }} className="space-y-4">
                     <div className="mb-4">
                         <Social />
                         <div className="relative my-4">
@@ -90,6 +111,23 @@ function RegisterForm() {
                             className="w-full p-3 border border-gray-300 rounded focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none text-sm transition-colors"
                             placeholder={t("auth.password")}
                         />
+                    </div>
+
+                    {/* Math Captcha */}
+                    <div className="bg-slate-50 p-3 rounded border border-slate-200">
+                        <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wide">Security Check</label>
+                        <div className="flex items-center gap-3">
+                            <div className="bg-white px-4 py-2 rounded border border-slate-200 font-mono text-lg font-bold text-slate-700 select-none">
+                                {captcha.num1} + {captcha.num2} = ?
+                            </div>
+                            <input
+                                name="captcha"
+                                type="number"
+                                required
+                                className="flex-1 p-3 border border-gray-300 rounded focus:border-green-500 outline-none text-sm"
+                                placeholder="Answer"
+                            />
+                        </div>
                     </div>
 
                     <button
