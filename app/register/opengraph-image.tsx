@@ -1,7 +1,7 @@
 
 import { ImageResponse } from 'next/og'
 
-// export const runtime = 'edge' // Switched to default Node.js for stability
+export const runtime = 'edge'
 
 export const alt = 'Koky.bz - Earn Money Online'
 export const size = {
