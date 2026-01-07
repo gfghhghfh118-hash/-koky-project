@@ -1,0 +1,278 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String          @id @default(uuid())
+  username         String?         @unique
+  password         String?
+  email            String?         @unique
+  emailVerified    DateTime?
+  image            String?
+  accounts         Account[]
+  balance          Float           @default(0.0)
+  adBalance        Float           @default(0.0)
+  role             String          @default("USER")
+  createdAt        DateTime        @default(now())
+  referredById     String?
+  referralEarnings Float           @default(0.0)
+  tickets          SupportTicket[]
+  createdTasks     Task[]          @relation("CreatedTasks")
+  tasksDone        TaskLog[]
+  transactions     Transaction[]
+  referredBy       User?           @relation("UserReferrals", fields: [referredById], references: [id])
+  referrals        User[]          @relation("UserReferrals")
+  commissionLogs   CommissionLog[]
+  banners          Banner[]
+  
+  // NEW FIELDS FOR AUTH & PREFS
+  accountType        String    @default("WORKER") // "WORKER" | "ADVERTISER"
+  allowNotifications Boolean   @default(true)
+  resetToken         String?
+  resetTokenExpiry   DateTime?
+
+  // PROMO SYSTEM
+  bonusRate          Float     @default(0.0) // e.g. 0.10 for 10%
+  bonusExpiresAt     DateTime?
+  promoRequests      PromotionRequest[]
+  adPlacements       AdPlacement[]
+  socialTasks        SocialTask[]
+  // Trigger deployment retry
+}
+
+model Task {
+  id               String    @id @default(uuid())
+  title            String
+  description      String?
+  type             String
+  realPrice        Float
+  userPayout       Float
+  duration         Int
+  active           Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  approvalType     String    @default("MANUAL")
+  validationAnswer String?
+  adminStatus      String    @default("APPROVED")
+  creatorId        String?
+  url              String?
+  creator          User?     @relation("CreatedTasks", fields: [creatorId], references: [id])
+  logs             TaskLog[]
+  moderationTags   String[]  @default([]) // "drugs", "terrorism", "sexual", etc.
+  targetQuantity   Int       @default(0)  // Total views/executions purchased
+  completedQuantity Int      @default(0)  // Number of times task was completed
+}
+
+model SocialTask {
+  id          String   @id @default(uuid())
+  title       String
+  type        String   // "YOUTUBE_LIKE", "YOUTUBE_SUBSCRIBE", "YOUTUBE_COMMENT"
+  url         String
+  price       Float    // Cost to Advertiser (e.g. 0.002)
+  payout      Float    // Pay to Worker (e.g. 0.001)
+  penaltyFee  Float    @default(0.10) // Fee if cheating detected
+  
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  
+  creatorId   String
+  creator     User     @relation(fields: [creatorId], references: [id])
+  logs        TaskLog[]
+}
+
+// Update TaskLog to link to SocialTask and track monitoring
+model TaskLog {
+  id           String      @id @default(uuid())
+  userId       String
+  taskId       String?     // Optional now, for legacy Task
+  socialTaskId String?     // Link to new SocialTask
+  
+  timestamp    DateTime    @default(now())
+  status       String      @default("PENDING") // PENDING, APPROVED, REJECTED, PENALIZED
+  proof        String?
+  earnedAmount Float
+  
+  // Penalty System
+  monitorUntil DateTime?   // timestamp + 24h
+  isPenalized  Boolean     @default(false)
+
+  task         Task?       @relation(fields: [taskId], references: [id])
+  socialTask   SocialTask? @relation(fields: [socialTaskId], references: [id])
+  user         User        @relation(fields: [userId], references: [id])
+}
+
+model Transaction {
+  id            String   @id @default(uuid())
+  userId        String
+  amount        Float
+  type          String   // "DEPOSIT", "WITHDRAWAL"
+  method        String?  // "USDT", "BTC"
+  status        String   @default("PENDING") // "PENDING", "COMPLETED", "REJECTED"
+  timestamp     DateTime @default(now())
+  wallet        String?  // Receiver wallet (for withdrawals)
+  senderWallet  String?  // Sender wallet (for deposits)
+  txId          String?  // Blockchain Transaction ID
+  fee           Float    @default(0.0) // 1% Platform Fee
+  netAmount     Float    @default(0.0) // Amount after fee
+  adminActionId String?  // ID of admin who approved/rejected
+  description   String?  // Description of the transaction (e.g., refund reason)
+  
+  user          User           @relation(fields: [userId], references: [id])
+  commissions   CommissionLog[]
+}
+
+model AdminProfitLog {
+  id          String   @id @default(uuid())
+  source      String
+  amount      Float
+  description String?
+  timestamp   DateTime @default(now())
+}
+
+model SupportTicket {
+  id         String    @id @default(uuid())
+  userId     String?
+  subject    String
+  message    String
+  adminReply String?
+  email      String
+  whatsapp   String?
+  status     String    @default("OPEN")
+  createdAt  DateTime  @default(now())
+  repliedAt  DateTime?
+  user       User?     @relation(fields: [userId], references: [id])
+}
+
+model Account {
+  id                 String  @id @default(uuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model CommissionLog {
+  id          String   @id @default(uuid())
+  recipientId String
+  amount      Float
+  role        String   // "REFERRER" or "ADVERTISER"
+  transactionId String
+  timestamp   DateTime @default(now())
+  
+  recipient   User     @relation(fields: [recipientId], references: [id])
+  transaction Transaction @relation(fields: [transactionId], references: [id])
+}
+
+model Banner {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  imageUrl  String
+  targetUrl String
+  type      String   @default("TOP_HEADER") // TOP_HEADER, SIDEBAR, FOOTER
+  
+  // Cost & Limits
+  cost      Float
+  days      Int      @default(0) // 0 means unlimited
+  views     Int      @default(0)
+  targetViews Int    @default(0)
+  clicks    Int      @default(0)
+  targetClicks Int   @default(0) // 0 means unlimited
+  
+  size      String   @default("468x60") // 468x60, 200x300, 728x90
+  
+  active    Boolean  @default(true)
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model PaymentMethod {
+  id          String   @id @default(uuid())
+  name        String   // e.g. "Vodafone Cash", "USDT"
+  type        String   // "DEPOSIT" or "WITHDRAWAL"
+  instruction String?  // e.g. Wallet Address, Instructions
+  feePercent  Float    @default(0.0)
+  minAmount   Float    @default(1.0)
+  maxAmount   Float    @default(1000.0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AdSettings {
+  id                String   @id @default(uuid())
+  pricePerDaySidebar Float    @default(0.15)
+  pricePerDayHeader  Float    @default(0.25)
+  pricePer1kViews    Float    @default(0.20)
+  pricePerClick      Float    @default(0.005)
+  updatedAt         DateTime @updatedAt
+}
+
+model PromoCode {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  bonusRate Float    // e.g. 0.10 for 10%
+  duration  Int      // Days, e.g. 90
+  maxUses   Int      @default(1)
+  usedCount Int      @default(0)
+
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+}
+
+model AdPlacement {
+  id        String   @id @default(uuid())
+  type      String   // "BANNER_TOP" or "TEXT_SIDEBAR"
+  slotIndex Int      // 0-7 for Banner, 0-4 for Text
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  imageUrl  String?  // For banners
+  linkUrl   String
+  text      String?  // For text ads
+  pricePaid Float
+  views     Int      @default(0)
+  clicks    Int      @default(0)
+  status    String   @default("ACTIVE") // ACTIVE, BANNED, EXPIRED
+  startsAt  DateTime @default(now())
+  expiresAt DateTime
+}
+
+model AdSetting {
+  key   String @id // "BANNER_PRICE", "TEXT_PRICE"
+  value Float
+}
+
+model PromotionRequest {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  videoUrl  String
+  status    String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  adminNote String?  // Stores the generated code if approved
+  createdAt DateTime @default(now())
+}
