@@ -1,7 +1,7 @@
 
 import { ImageResponse } from 'next/og'
 
-export const runtime = 'edge'
+// export const runtime = 'edge' // Reverted to Node.js as Edge caused issues
 
 export const alt = 'Koky.bz - Earn Money Online'
 export const size = {
