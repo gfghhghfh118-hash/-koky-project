@@ -45,7 +45,7 @@ export default async function Home() {
                                     <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                                     Partner Links
                                 </h3>
-                                <SidebarAds ads={JSON.parse(JSON.stringify(sidebarAds))} displayPrice={0.07} />
+                                <SidebarAds ads={sidebarAds} displayPrice={0.07} />
                             </div>
                         </div>
                     </aside>

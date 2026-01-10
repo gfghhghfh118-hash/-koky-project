@@ -20,13 +20,15 @@ export function PurchaseBannerModal({ type, onClose, isOpen, price }: { type: st
 
     useEffect(() => {
         getAdSettings().then(s => {
-            setPrices({
-                daySidebar: s.pricePerDaySidebar,
-                dayHeader: s.pricePerDayHeader,
-                dayLinkAd: 0.07, // Hardcoded for now
-                per1kViews: s.pricePer1kViews,
-                perClick: s.pricePerClick
-            });
+            if (s) {
+                setPrices({
+                    daySidebar: s.pricePerDaySidebar,
+                    dayHeader: s.pricePerDayHeader,
+                    dayLinkAd: 0.07, // Hardcoded for now
+                    per1kViews: s.pricePer1kViews,
+                    perClick: s.pricePerClick
+                });
+            }
         });
     }, []);
 

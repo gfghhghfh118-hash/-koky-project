@@ -76,7 +76,7 @@ export default async function UserDashboard() {
                         </span>
                     </div>
                     <div className="flex-1">
-                        <SidebarAds ads={JSON.parse(JSON.stringify(greenAds))} displayPrice={0.07} />
+                        <SidebarAds ads={greenAds} displayPrice={0.07} />
                     </div>
                 </div>
 
