@@ -32,10 +32,10 @@ export function PurchaseBannerModal({ type, onClose, isOpen, price, settings }: 
             ? (views / 1000) * prices.per1kViews
             : clicks * prices.perClick;
 
+    const [format, setFormat] = useState<"IMAGE" | "TEXT">("IMAGE"); // New state for ad format
+
     // Handle visibility
     if (typeof isOpen !== "undefined" && !isOpen) return null;
-
-    const [format, setFormat] = useState<"IMAGE" | "TEXT">("IMAGE"); // New state for ad format
 
     async function handleBuy(form: FormData) {
         // If Text Format is selected for a BANNER ad (NOT LINK_AD), construct a special URL
