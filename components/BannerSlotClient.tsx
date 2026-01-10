@@ -10,7 +10,7 @@ export function BannerSlotClient({ type, initialBanner, displayPrice }: { type: 
     const [showModal, setShowModal] = useState(false);
 
     // Determine price based on type if not provided
-    const finalPrice = displayPrice || (type.startsWith("DASHBOARD_GRID") ? 0.20 : 0.25);
+    const finalPrice = displayPrice || 0.15;
 
     const handleBannerClick = async () => {
         if (initialBanner?.id) {
