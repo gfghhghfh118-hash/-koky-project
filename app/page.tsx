@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { getAdSettings } from "@/actions/ad-settings";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { PromoSection } from "@/components/landing/PromoSection";

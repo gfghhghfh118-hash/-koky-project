@@ -1,36 +1,21 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { purchaseBanner } from "@/actions/banners";
-import { getAdSettings } from "@/actions/ad-settings";
 
-export function PurchaseBannerModal({ type, onClose, isOpen, price }: { type: string, onClose: () => void, isOpen?: boolean, price?: number }) {
+export function PurchaseBannerModal({ type, onClose, isOpen, price, settings }: { type: string, onClose: () => void, isOpen?: boolean, price?: number, settings?: any }) {
     const [mode, setMode] = useState<"DAYS" | "VIEWS" | "CLICKS">("DAYS");
     const [msg, setMsg] = useState("");
 
-    // Dynamic Pricing State
-    const [prices, setPrices] = useState({
-        daySidebar: 0.15,
-        dayHeader: 0.15,
+    // Use passed settings or defaults
+    const prices = {
+        daySidebar: settings?.pricePerDaySidebar ?? 0.15,
+        dayHeader: settings?.pricePerDayHeader ?? 0.15,
         dayLinkAd: 0.07,
-        per1kViews: 0.20,
-        perClick: 0.005
-    });
-
-    useEffect(() => {
-        getAdSettings().then(s => {
-            if (s) {
-                setPrices({
-                    daySidebar: s.pricePerDaySidebar,
-                    dayHeader: s.pricePerDayHeader,
-                    dayLinkAd: 0.07, // Hardcoded for now
-                    per1kViews: s.pricePer1kViews,
-                    perClick: s.pricePerClick
-                });
-            }
-        });
-    }, []);
+        per1kViews: settings?.pricePer1kViews ?? 0.20,
+        perClick: settings?.pricePerClick ?? 0.005
+    };
 
     const [days, setDays] = useState(1);
     const [views, setViews] = useState(1000);

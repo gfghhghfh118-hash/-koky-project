@@ -6,7 +6,7 @@ import Image from "next/image";
 import { PurchaseBannerModal } from "./PurchaseBannerModal";
 import { registerBannerClick } from "@/actions/banners";
 
-export function BannerSlotClient({ type, initialBanner, displayPrice }: { type: string, initialBanner: any, displayPrice?: number }) {
+export function BannerSlotClient({ type, initialBanner, displayPrice, settings }: { type: string, initialBanner: any, displayPrice?: number, settings?: any }) {
     const [showModal, setShowModal] = useState(false);
 
     // Determine price based on type if not provided
@@ -123,7 +123,7 @@ export function BannerSlotClient({ type, initialBanner, displayPrice }: { type: 
                 </button>
             </div>
 
-            {showModal && <PurchaseBannerModal type={type} price={finalPrice} onClose={() => setShowModal(false)} />}
+            {showModal && <PurchaseBannerModal type={type} price={finalPrice} onClose={() => setShowModal(false)} settings={settings} />}
         </>
     );
 }

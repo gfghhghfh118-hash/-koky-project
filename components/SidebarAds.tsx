@@ -6,7 +6,7 @@ import { PurchaseBannerModal } from "./PurchaseBannerModal";
 import { registerBannerClick } from "@/actions/banners";
 import { ExternalLink } from "lucide-react";
 
-export function SidebarAds({ ads, displayPrice }: { ads: any[], displayPrice?: number }) {
+export function SidebarAds({ ads, displayPrice, settings }: { ads: any[], displayPrice?: number, settings?: any }) {
     const [showModal, setShowModal] = useState(false);
     const price = displayPrice || 0.07; // Default to $0.07
 
@@ -56,6 +56,7 @@ export function SidebarAds({ ads, displayPrice }: { ads: any[], displayPrice?: n
                 onClose={() => setShowModal(false)}
                 type="LINK_AD"
                 price={price}
+                settings={settings}
             />
         </div>
     );

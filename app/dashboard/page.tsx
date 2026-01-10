@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
+import { getAdSettings } from "@/actions/ad-settings";
 import { BannerSlot } from "@/components/BannerSlot";
 import { SidebarAds } from "@/components/SidebarAds";
 import { getBannerBatch } from "@/actions/banners";
