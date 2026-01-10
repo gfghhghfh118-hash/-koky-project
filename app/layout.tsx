@@ -11,24 +11,27 @@ import { BrowserBlock } from "@/components/BrowserBlock";
 const outfit = Outfit({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-    metadataBase: new URL("https://koky-project-op1a.vercel.app"), // Set base URL for OG images
+    metadataBase: new URL("https://koky-project-op1a.vercel.app"),
+    applicationName: "Koky Project",
     title: {
-        default: "Koky.bz | Earn $10 Daily from Home 💸",
-        template: "%s | Koky.bz"
+        default: "Koky Project | Earn $10 Daily Watching Videos 💸",
+        template: "%s | Koky Project"
     },
-    description: "Join 50,000+ users earning real money securely! Watch videos, surf sites, and get paid instantly via Crypto & PayPal. Sign up now & get a $0.50 bonus!",
+    description: " The #1 site to earn money online. Join Koky Project to watch videos, visit websites, and get paid instantly. Safe, legit, and trusted by 50,000+ users.",
+    keywords: ["Koky Project", "Koky", "Koky.bz", "Earn Money Online", "Watch Videos Earn", "Make Money from Home", "Legit Paying Sites", "Crypto Earning"],
+    authors: [{ name: "Koky Team", url: "https://koky.bz" }],
     openGraph: {
-        title: "🔥 Earn $10 Daily - Guaranteed Payouts!",
-        description: "Stop scrolling for free. Start getting paid for your time online. Instant withdrawals to Binance, Payeer & more.",
+        title: "🔥 Koky Project - Earn $10 Daily Guaranteed!",
+        description: "Stop scrolling for free. Start getting paid for your time online with Koky Project. Instant withdrawals.",
         url: "https://koky.bz",
-        siteName: "Koky.bz",
+        siteName: "Koky Project",
         locale: "en_US",
         type: "website",
     },
     twitter: {
         card: "summary_large_image",
-        title: "💸 I just withdrew $10 from Koky.bz!",
-        description: "Easiest way to earn crypto online. No investment needed. Click to join my team!",
+        title: "💸 I just withdrew $10 from Koky Project!",
+        description: "Easiest way to earn crypto online. No investment needed. Click to join my team on Koky Project!",
     }
 };
 
