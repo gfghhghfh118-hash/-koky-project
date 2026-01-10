@@ -13,5 +13,5 @@ export async function BannerSlot({ type, manualData }: { type: string, manualDat
     const settings = await getAdSettings();
     price = settings.pricePerDayHeader;
 
-    return <BannerSlotClient type={type} initialBanner={banner} displayPrice={price} />;
+    return <BannerSlotClient type={type} initialBanner={banner ? JSON.parse(JSON.stringify(banner)) : null} displayPrice={price} />;
 }

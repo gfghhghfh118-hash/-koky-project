@@ -64,5 +64,5 @@ export default async function SurfingPage({
         return <div className="p-10 text-center text-slate-500 font-black uppercase tracking-widest">{t('premium.empty_queue')}</div>;
     }
 
-    return <SurfingClient task={task} />;
+    return <SurfingClient task={JSON.parse(JSON.stringify(task))} />;
 }
