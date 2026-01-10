@@ -46,6 +46,27 @@ ${bioLink}`,
             text: `💰 Earn $10/day watching ads!
 👇 Link to join (Remove spaces):
 ${bioLink.replace("https://", "").split("").join(" ")}`,
+        },
+        {
+            id: "yt-stealth",
+            title: "YouTube Comment (Stealth Mode 🥷)",
+            type: "TEXT" as const,
+            url: "/promo/yt-icon.png",
+            color: "bg-emerald-900",
+            text: `I finally found a legit site for watching ads. 
+They actually pay (checked myself).
+⚠️ I can't post the link here (YouTube blocks it).
+👉 CLICK MY PROFILE PICTURE > The link is in my bio!`,
+        },
+        {
+            id: "yt-google",
+            title: "YouTube Comment (Search Strategy 🔍)",
+            type: "TEXT" as const,
+            url: "/promo/yt-icon.png",
+            color: "bg-blue-900",
+            text: `Want to earn from watching videos?
+Just search "Koky Project" on Google.
+It's the first result! (Use my code ${username} for a bonus)`,
         }
     ];
 
