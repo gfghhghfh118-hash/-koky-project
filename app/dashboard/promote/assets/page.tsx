@@ -36,6 +36,16 @@ export default async function PromoAssetsPage() {
 🎯 10% referral commission + EXTRA 10% bonus for 3 months when you create a website review video
 👉 Sign up now:
 ${bioLink}`,
+        },
+        {
+            id: "yt-antiban",
+            title: "YouTube Comment (Anti-Ban 🛡️)",
+            type: "TEXT" as const,
+            url: "/promo/yt-icon.png",
+            color: "bg-slate-800",
+            text: `💰 Earn $10/day watching ads!
+👇 Link to join (Remove spaces):
+${bioLink.replace("https://", "").split("").join(" ")}`,
         }
     ];
 
