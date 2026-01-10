@@ -12,8 +12,6 @@ export async function BannerSlot({ type, manualData }: { type: string, manualDat
     let price = 0;
     if (type.startsWith("DASHBOARD_GRID")) {
         price = 0.20;
-    } else if (type === "SIDEBAR") {
-        price = 0.07;
     } else {
         // Fallback to settings for other future types
         const settings = await getAdSettings();

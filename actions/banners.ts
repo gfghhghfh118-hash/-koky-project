@@ -31,7 +31,12 @@ export async function purchaseBanner(formData: FormData) {
     let cost = 0;
 
     if (durationDays > 0) {
-        const pricePerDay = bannerType === "SIDEBAR" ? settings.pricePerDaySidebar : settings.pricePerDayHeader;
+        let pricePerDay;
+        if (bannerType === "LINK_AD") {
+            pricePerDay = 0.07; // Fixed price for Link Ads
+        } else {
+            pricePerDay = bannerType === "SIDEBAR" ? settings.pricePerDaySidebar : settings.pricePerDayHeader;
+        }
         cost = durationDays * pricePerDay;
     } else if (targetClicks > 0) {
         cost = targetClicks * settings.pricePerClick;
@@ -54,6 +59,10 @@ export async function purchaseBanner(formData: FormData) {
                 where: { id: userId },
                 data: { adBalance: { decrement: cost } }
             });
+
+            // CHECK & APPLY FIRST CAMPAIGN BONUS (10%)
+            const { checkAndApplyFirstCampaignBonus } = await import("@/actions/campaign-rewards");
+            await checkAndApplyFirstCampaignBonus(tx, userId, cost);
 
             if (bannerType === "LINK_AD") {
                 // PURCHASE TEXT AD

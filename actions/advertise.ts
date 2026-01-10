@@ -50,6 +50,10 @@ export async function createYouTubeCampaign(formData: FormData) {
                 data: { adBalance: { decrement: totalCost } }
             });
 
+            // CHECK & APPLY FIRST CAMPAIGN BONUS (10%)
+            const { checkAndApplyFirstCampaignBonus } = await import("@/actions/campaign-rewards");
+            await checkAndApplyFirstCampaignBonus(tx, userId, totalCost);
+
             // 2. Create Task
             // Note: In a real system we'd track "remaining views".
             // Here we just create the task. To support "limit", we'd need a `viewsRemaining` field in Task. 
@@ -117,6 +121,11 @@ export async function createSurfingCampaign(formData: FormData) {
                 where: { id: userId },
                 data: { adBalance: { decrement: totalCost } }
             });
+
+            // CHECK & APPLY FIRST CAMPAIGN BONUS (10%)
+            const { checkAndApplyFirstCampaignBonus } = await import("@/actions/campaign-rewards");
+            await checkAndApplyFirstCampaignBonus(tx, userId, totalCost);
+
 
             await tx.task.create({
                 data: {
@@ -195,6 +204,11 @@ export async function createGeneralTaskCampaign(formData: FormData) {
                 where: { id: userId },
                 data: { adBalance: { decrement: totalCost } }
             });
+
+            // CHECK & APPLY FIRST CAMPAIGN BONUS (10%)
+            const { checkAndApplyFirstCampaignBonus } = await import("@/actions/campaign-rewards");
+            await checkAndApplyFirstCampaignBonus(tx, userId, totalCost);
+
 
             await tx.task.create({
                 data: {

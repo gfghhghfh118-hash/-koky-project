@@ -123,7 +123,7 @@ export function BannerSlotClient({ type, initialBanner, displayPrice }: { type: 
                 </button>
             </div>
 
-            {showModal && <PurchaseBannerModal type={type} onClose={() => setShowModal(false)} />}
+            {showModal && <PurchaseBannerModal type={type} price={finalPrice} onClose={() => setShowModal(false)} />}
         </>
     );
 }

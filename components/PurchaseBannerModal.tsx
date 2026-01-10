@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import { purchaseBanner } from "@/actions/banners";
 import { getAdSettings } from "@/actions/ad-settings";
-import { useLanguage } from "@/components/providers/LanguageProvider"; // Assume we'll add keys later
+
 
 export function PurchaseBannerModal({ type, onClose, isOpen, price }: { type: string, onClose: () => void, isOpen?: boolean, price?: number }) {
     const [mode, setMode] = useState<"DAYS" | "VIEWS" | "CLICKS">("DAYS");

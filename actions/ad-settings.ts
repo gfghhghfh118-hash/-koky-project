@@ -18,14 +18,19 @@ export async function getAdSettings() {
                 }
             });
         }
-        if (settings.pricePerDayHeader === 0.25) {
+
+        // Fix: Force 0.20 -> 0.15 (User Requested Change)
+        if (settings.pricePerDayHeader !== 0.15) {
             await db.adSettings.update({
                 where: { id: settings.id },
-                data: { pricePerDayHeader: 0.15 }
+                data: {
+                    pricePerDayHeader: 0.15,
+                    pricePerDaySidebar: 0.15
+                }
             });
             settings.pricePerDayHeader = 0.15;
+            settings.pricePerDaySidebar = 0.15;
 
-            // Force cache refresh
             revalidatePath("/", "layout");
             revalidatePath("/dashboard", "layout");
         }
@@ -37,7 +42,7 @@ export async function getAdSettings() {
         return {
             id: "fallback",
             pricePerDaySidebar: 0.15,
-            pricePerDayHeader: 0.25,
+            pricePerDayHeader: 0.15,
             pricePer1kViews: 0.20,
             pricePerClick: 0.005
         };
